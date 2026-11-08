@@ -14,25 +14,30 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * This class stores entities in memory, indexed by their identifiers.
- * @param <ID> the type of the entities' identifiers;
- * @param <E> the type of entities stored in the repository;
+ * Stores entities in memory, indexed by their identifiers.
+ *
+ * @param <ID> the type of the entities' identifiers
+ * @param <E> the type of entities stored in the repository
  */
 public class MemoryRepository<ID,E extends Entity<ID>> implements Repository<ID,E>{
     private final Map<ID,E> repoMap;
+
+    /** Validator used to check entities before they are stored. */
     protected final Validator<E> validator;
 
     /**
-     * This function creates an in-memory repository using the specified validator.
-     * @param validator the validator used to check entities before they are stored;
+     * Creates an in-memory repository using the specified validator.
+     *
+     * @param validator the validator used to check entities before they are stored
      */
     public MemoryRepository(Validator<E> validator) {
         this.validator = validator;
         this.repoMap = new HashMap<>();
     }
     /**
-     * This function returns the number of entities in the repository.
-     * @return the number of stored entities;
+     * Returns the number of entities in the repository.
+     *
+     * @return the number of stored entities
      */
     @Override
     public int size(){
@@ -40,9 +45,10 @@ public class MemoryRepository<ID,E extends Entity<ID>> implements Repository<ID,
     }
 
     /**
-     * This function returns a list of the entities in the repository that are accepted by the filter.
-     * @param filter a predicate which acts as a filter for the entities;
-     * @return A list of the filtered entities in the repository.
+     * Returns the entities in the repository that satisfy the filter.
+     *
+     * @param filter the predicate used to filter entities
+     * @return a list of entities accepted by the filter
      */
     @Override
     public List<E> findAll(Predicate<E> filter) {
@@ -51,10 +57,11 @@ public class MemoryRepository<ID,E extends Entity<ID>> implements Repository<ID,
                 .toList();
     }
     /**
-     * This function finds an entity by its identifier.
-     * @param id the identifier of the entity to find;
-     * @return the entity with the specified identifier, or Optional.empty() if it doesn't exist in the repository;
-     * @throws RepositoryException if the ID is null;
+     * Finds an entity by its identifier.
+     *
+     * @param id the identifier of the entity to find
+     * @return the entity with the specified identifier, or {@code Optional.empty()} if it is not in the repository
+     * @throws RepositoryException if {@code id} is {@code null}
      */
     @Override
     public Optional<E> findElement(ID id) throws RepositoryException {
@@ -67,11 +74,12 @@ public class MemoryRepository<ID,E extends Entity<ID>> implements Repository<ID,
         return Optional.empty();
     }
     /**
-     * This function validates and adds an entity to the repository.
-     * @param new_element the entity to add;
-     * @return Optional.empty() if an entity with the same identifier already exists, and it returns the entity if the add operation is successful;
-     * @throws ValidationException if the entity does not satisfy its validation rules;
-     * @throws RepositoryException if the entity is null, or its ID is null;
+     * Validates and adds an entity to the repository.
+     *
+     * @param new_element the entity to add
+     * @return {@code Optional.empty()} if an entity with the same identifier already exists, or the added entity
+     * @throws ValidationException if the entity does not satisfy its validation rules
+     * @throws RepositoryException if the entity or its identifier is {@code null}
      */
     @Override
     public Optional<E> addElement(E new_element) throws RepositoryException, ValidationException {
@@ -89,9 +97,10 @@ public class MemoryRepository<ID,E extends Entity<ID>> implements Repository<ID,
         return Optional.of(new_element);
     }
     /**
-     * This function removes an entity from the repository by its identifier.
-     * @param id the identifier of the entity to remove;
-     * @return Optional.empty() if no entity with the specified identifier exists, or the deleted element if the identifier exists;
+     * Removes an entity from the repository by its identifier.
+     *
+     * @param id the identifier of the entity to remove
+     * @return {@code Optional.empty()} if no entity with the identifier exists, or the removed entity
      */
     @Override
     public Optional<E> deleteElement(ID id) throws RepositoryException {
@@ -99,11 +108,12 @@ public class MemoryRepository<ID,E extends Entity<ID>> implements Repository<ID,
     }
 
     /**
-     * This function validates and replaces an existing entity.
-     * @param new_element the entity containing the replacement data;
-     * @return the given element if the element's id doesn't exist in the repository, and it returns Optional.empty() on success;
-     * @throws RepositoryException if the entity is null;
-     * @throws ValidationException if the entity does not satisfy its validation rules;
+     * Validates and replaces an existing entity.
+     *
+     * @param new_element the entity containing the replacement data
+     * @return the given entity if its identifier is not in the repository, or {@code Optional.empty()} if it was replaced
+     * @throws RepositoryException if the entity or its identifier is {@code null}
+     * @throws ValidationException if the entity does not satisfy its validation rules
      */
     @Override
     public Optional<E> modifyElement(E new_element) throws RepositoryException {

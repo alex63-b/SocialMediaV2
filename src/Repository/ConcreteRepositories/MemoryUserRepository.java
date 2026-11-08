@@ -13,14 +13,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * This class stores users in memory and notifies observers when users change.
+ * Stores users in memory and notifies observers when the repository changes.
  */
 public class MemoryUserRepository extends MemoryRepository<Long, User> implements ObservableUserRepository {
     private final List<FriendshipObserver> observers = new ArrayList<>();
 
     /**
-     * This function creates an observable in-memory user repository.
-     * @param validator the validator used for users;
+     * Creates an observable in-memory user repository.
+     *
+     * @param validator the validator used for users
      */
     public MemoryUserRepository(Validator<User> validator) {
 
@@ -28,8 +29,9 @@ public class MemoryUserRepository extends MemoryRepository<Long, User> implement
     }
 
     /**
-     * This function registers an observer to receive user repository updates.
-     * @param new_observer the observer to register;
+     * Registers an observer to receive user repository updates.
+     *
+     * @param new_observer the observer to register
      */
     @Override
     public void addObserver(FriendshipObserver new_observer) {
@@ -38,8 +40,9 @@ public class MemoryUserRepository extends MemoryRepository<Long, User> implement
     }
 
     /**
-     * This function removes an observer from user repository notifications.
-     * @param deleted_observer the observer to remove;
+     * Removes an observer from user repository notifications.
+     *
+     * @param deleted_observer the observer to remove
      */
     @Override
     public void removeObserver(FriendshipObserver deleted_observer) {
@@ -48,7 +51,7 @@ public class MemoryUserRepository extends MemoryRepository<Long, User> implement
     }
 
     /**
-     * This function notifies all registered observers about a repository update.
+     * Notifies all registered observers about a repository update.
      */
     @Override
     public void notifyObservers() {
@@ -56,10 +59,12 @@ public class MemoryUserRepository extends MemoryRepository<Long, User> implement
     }
 
     /**
-     * This function validates and adds a user, then notifies observers.
-     * @param new_element the user to add;
-     * @throws RepositoryException if a user with the same ID already exists;
-     * @throws ValidationException if the user does not satisfy its validation rules;
+     * Validates and adds a user, then notifies observers if the addition succeeds.
+     *
+     * @param new_element the user to add
+     * @return {@code Optional.empty()} if a user with the same identifier already exists, or the added user
+     * @throws RepositoryException if the user or its identifier is {@code null}
+     * @throws ValidationException if the user does not satisfy its validation rules
      */
     @Override
     public Optional<User> addElement(User new_element) throws RepositoryException {
@@ -71,9 +76,10 @@ public class MemoryUserRepository extends MemoryRepository<Long, User> implement
     }
 
     /**
-     * This function removes a user and notifies observers.
-     * @param id the ID of the user to remove;
-     * @throws RepositoryException if the user does not exist;
+     * Removes a user and notifies observers if a user was removed.
+     *
+     * @param id the identifier of the user to remove
+     * @return {@code Optional.empty()} if no user with the identifier exists, or the removed user
      */
     @Override
     public Optional<User> deleteElement(Long id) throws RepositoryException {
@@ -85,10 +91,12 @@ public class MemoryUserRepository extends MemoryRepository<Long, User> implement
     }
 
     /**
-     * This function replaces a user and notifies observers.
-     * @param new_element the user containing the replacement data;
-     * @throws RepositoryException if the user does not exist;
-     * @throws ValidationException if the user does not satisfy its validation rules;
+     * Replaces a user and notifies observers if the replacement succeeds.
+     *
+     * @param new_element the user containing the replacement data
+     * @return the given user if its identifier is not in the repository, or {@code Optional.empty()} if it was replaced
+     * @throws RepositoryException if the user or its identifier is {@code null}
+     * @throws ValidationException if the user does not satisfy its validation rules
      */
     @Override
     public Optional<User> modifyElement(User new_element) throws RepositoryException {
