@@ -59,23 +59,6 @@ public class FriendshipHelper {
     }
 
     /**
-     * This function updates the friends of the old users and of the new users when a friendship is modified.
-     * @param new_element the new friendship;
-     * @param oldFriend1 the first old friend;
-     * @param oldFriend2 the second old friend;
-     */
-    public void updateFriends(Friendship new_element, User oldFriend1, User oldFriend2){
-        if(!oldFriend1.equals(new_element.getFriend1())){
-            oldFriend1.removeFriend(oldFriend2);
-            new_element.getFriend1().addFriend(new_element.getFriend2());
-        }
-        if(!oldFriend2.equals(new_element.getFriend2())){
-            oldFriend2.removeFriend(oldFriend1);
-            new_element.getFriend2().addFriend(new_element.getFriend1());
-        }
-    }
-
-    /**
      * This function is used to help with the update after a notification from the observable object. It handles deletion and
      * modification anomalies(when modification/deletion happens in the user repository).
      * @param userRepo a user repository from where the friendships take their users;

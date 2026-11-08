@@ -19,8 +19,14 @@ public class Friendship extends Entity<Pair<Long>> {
     public Friendship(User friend1, User friend2, LocalDateTime date) {
         super(new Pair<>(friend1.getId(),friend2.getId()));
         this.date = date;
-        this.friend1 = friend1;
-        this.friend2 = friend2;
+        if(friend1.getId() > friend2.getId()){
+            this.friend2 = friend1;
+            this.friend1 = friend2;
+        }
+        else{
+            this.friend1 = friend1;
+            this.friend2 = friend2;
+        }
     }
 
     /**

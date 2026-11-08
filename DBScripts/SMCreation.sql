@@ -8,8 +8,12 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS friendships (
     id1 BIGINT REFERENCES users (id) ON DELETE CASCADE,
     id2 BIGINT REFERENCES users (id) ON DELETE CASCADE,
-    friendshipDate TIMESTAMP,
+    friendshipDate TIMESTAMP NOT NULL,
     PRIMARY KEY (id1, id2),
     CHECK (id1 < id2)
     );
+
+DROP TABLE friendships;
+DROP TABLE users;
+
 

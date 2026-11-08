@@ -82,8 +82,8 @@ public class FriendshipFileRepositoryTest {
             fail();
         }
         if(friendship_repo.findElement(new Pair<>(3L,2L)).isPresent()) {
-            assertEquals("Luke Scott", friendship_repo.findElement(new Pair<>(3L, 2L)).get().getFriend1().getName());
-            assertEquals("Phil Smith", friendship_repo.findElement(new Pair<>(3L, 2L)).get().getFriend2().getName());
+            assertEquals("Luke Scott", friendship_repo.findElement(new Pair<>(3L, 2L)).get().getFriend2().getName());
+            assertEquals("Phil Smith", friendship_repo.findElement(new Pair<>(3L, 2L)).get().getFriend1().getName());
         }
         else{
             fail();
@@ -144,23 +144,5 @@ public class FriendshipFileRepositoryTest {
         FriendshipFileRepository friendship_repo = new FriendshipFileRepository(user_repo,friendshipValidator,friendship_path);
 
         ConcreteRepoTestHelper.errorAdd(user_repo,friendship_repo);
-    }
-    @Test
-    public void testDoubleFriendAdd(){
-        Validator<User> userValidator = new UserValidator();
-        Validator<Friendship> friendshipValidator = new FriendshipValidator();
-        UserFileRepository userRepo = new UserFileRepository(userValidator,user_path);
-        FriendshipFileRepository friendshipRepo = new FriendshipFileRepository(userRepo,friendshipValidator,friendship_path);
-
-        ConcreteRepoTestHelper.doubleFriendAdd(userRepo,friendshipRepo);
-    }
-    @Test
-    public void testFriendshipDelete(){
-        Validator<User> userValidator = new UserValidator();
-        Validator<Friendship> friendshipValidator = new FriendshipValidator();
-        UserFileRepository userRepo = new UserFileRepository(userValidator,user_path);
-        FriendshipFileRepository friendshipRepo = new FriendshipFileRepository(userRepo,friendshipValidator,friendship_path);
-
-        ConcreteRepoTestHelper.friendshipDelete(userRepo,friendshipRepo);
     }
 }

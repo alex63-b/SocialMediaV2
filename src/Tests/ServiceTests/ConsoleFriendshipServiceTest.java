@@ -55,7 +55,7 @@ class ConsoleFriendshipServiceTest {
         Repository<Pair<Long>,Friendship> friendship_repo = new FriendshipFileRepository(user_repo,friendshipValidator,friendship_path);
         ConsoleFriendshipService service = new ConsoleFriendshipService(friendship_repo,user_repo);
 
-        assertEquals("Friendship between Luke Scott(ID 3) and Phil Smith(ID 2) started on the date 1 JULY 2024, at 21:03:24;\n" +
+        assertEquals("Friendship between Phil Smith(ID 2) and Luke Scott(ID 3) started on the date 1 JULY 2024, at 21:03:24;\n" +
                         "Friendship between John Doe(ID 1) and Luke Scott(ID 3) started on the date 13 DECEMBER 2025, at 17:02:22;\n",service.showAllFriendships());
     }
 }

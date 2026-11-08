@@ -62,14 +62,26 @@ public class BasicFriendshipService {
             throw new ValidationException("The ID's of the friends don't exist!");
         }
     }
+    private Map<Long,List<Long>> getAdjacencyList(){
+        Map<Long,List<Long>> adjacencyList = new TreeMap<>();
+        friendshipRepo.findAll(DefaultFilters::filterTrue).forEach((f) -> {
+            Long id1 = f.getFriend1().getId();
+            Long id2 = f.getFriend2().getId();
 
-    private void DFS(Map<Long,Long> idTracker, Long startID, Long componentCount){
+            adjacencyList.putIfAbsent(id1,new ArrayList<>());
+            adjacencyList.putIfAbsent(id2,new ArrayList<>());
+
+            adjacencyList.get(id1).add(id2);
+            adjacencyList.get(id2).add(id1);
+        });
+        return adjacencyList;
+    }
+    private void DFS(Map<Long,List<Long>> adjacencyList, Map<Long,Long> idTracker, Long startID, Long componentCount){
         idTracker.put(startID,componentCount);
-        if(userRepo.findElement(startID).isPresent()) {
-            User currentUser = userRepo.findElement(startID).get();
-            currentUser.getFriends().stream()
-                    .filter((friend) -> idTracker.get(friend.getId()) == 0)
-                    .forEach((friend) -> DFS(idTracker, friend.getId(), componentCount));
+        if(adjacencyList.containsKey(startID)) {
+            adjacencyList.get(startID).stream()
+                    .filter((id) -> idTracker.get(id) == 0)
+                    .forEach((id) -> DFS(adjacencyList, idTracker, id, componentCount));
         }
     }
 
@@ -81,10 +93,11 @@ public class BasicFriendshipService {
     public int communityCount(){
         Map<Long,Long> idTracker = userRepo.findAll(DefaultFilters::filterTrue).stream()
                                               .collect(Collectors.toMap(User::getId, DefaultSuppliers::get0));
+        Map<Long,List<Long>> adjacencyList = getAdjacencyList();
         idTracker.keySet()
                 .forEach((id) -> {
                     if(idTracker.get(id) == 0) {
-                        DFS(idTracker, id, id);
+                        DFS(adjacencyList,idTracker, id, id);
                     }
                 });
         return idTracker.values().stream()
@@ -149,8 +162,8 @@ public class BasicFriendshipService {
         Long idStart = positionToId.get(maxPosition);
         Map<Long,Long> idTracker = userRepo.findAll(DefaultFilters::filterTrue).stream()
                         .collect(Collectors.toMap(User::getId,DefaultSuppliers::get0));
-
-        DFS(idTracker,idStart,idStart);
+        Map<Long,List<Long>> adjacencyList = getAdjacencyList();
+        DFS(adjacencyList,idTracker,idStart,idStart);
         return new ArrayList<>(idTracker.keySet().stream()
                 .filter((id) -> idTracker.get(id) != 0)
                 .map(userRepo::findElement)

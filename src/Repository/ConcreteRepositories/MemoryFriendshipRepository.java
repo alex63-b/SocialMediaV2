@@ -31,10 +31,6 @@ public class MemoryFriendshipRepository extends MemoryRepository<Pair<Long>, Fri
         this.friendshipHelper = FriendshipHelper.getFriendshipHelper();
         user_repo.addObserver(this);
     }
-    private void addFriendsAfterAdd(Friendship new_element){
-        new_element.getFriend1().addFriend(new_element.getFriend2());
-        new_element.getFriend2().addFriend(new_element.getFriend1());
-    }
 
     /**
      * This function removes a friendship and removes the corresponding friend links from both users.
@@ -43,13 +39,6 @@ public class MemoryFriendshipRepository extends MemoryRepository<Pair<Long>, Fri
      */
     @Override
     public Optional<Friendship> deleteElement(Pair<Long> id) throws RepositoryException {
-        Optional<Friendship> optionalFriendship = findElement(id);
-        if(optionalFriendship.isPresent()) {
-            Friendship friendship = optionalFriendship.get();
-
-            friendship.getFriend1().removeFriend(friendship.getFriend2());
-            friendship.getFriend2().removeFriend(friendship.getFriend1());
-        }
         return super.deleteElement(id);
     }
 
@@ -66,28 +55,7 @@ public class MemoryFriendshipRepository extends MemoryRepository<Pair<Long>, Fri
             return result;
         }
         friendshipHelper.validateRelations(new_element, user_repo, this);
-        addFriendsAfterAdd(new_element);
         return result;
-    }
-
-    /**
-     * This function replaces a friendship and updates the users' friend links.
-     * @param new_element the friendship containing the replacement data;
-     * @throws RepositoryException if the friendship does not exist;
-     * @throws ValidationException if the friendship does not satisfy its validation rules;
-     */
-    @Override
-    public Optional<Friendship> modifyElement(Friendship new_element){
-        if(findElement(new_element.getId()).isPresent()) {
-            User oldFriend1 = findElement(new_element.getId()).get().getFriend1();
-            User oldFriend2 = findElement(new_element.getId()).get().getFriend2();
-            Optional<Friendship> result = super.modifyElement(new_element);
-
-            friendshipHelper.updateFriends(new_element, oldFriend1, oldFriend2);
-
-            return result;
-        }
-        return Optional.of(new_element);
     }
 
     /**

@@ -38,6 +38,9 @@ public class FriendshipValidator implements Validator<Friendship>{
      * @throws ValidationException if the start date is in the future;
      */
     private void validateDate(Friendship friendship){
+        if(friendship == null){
+            throw new ValidationException("The friendship's date can't be null!");
+        }
         if(friendship.getDate().isAfter(LocalDateTime.now())){
             throw new ValidationException("The date on which the friendship started cannot be in the future!");
         }

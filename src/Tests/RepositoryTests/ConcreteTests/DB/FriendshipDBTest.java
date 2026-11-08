@@ -72,7 +72,7 @@ public class FriendshipDBTest {
                     PreparedStatement statementFriend = connection.prepareStatement(friendshipSql);
                     statementFriend.setLong(1, id1List.get(i));
                     statementFriend.setLong(2, id2List.get(i));
-                    statementFriend.setDate(3, Date.valueOf(dateList.get(i).toLocalDate()));
+                    statementFriend.setTimestamp(3, Timestamp.valueOf(dateList.get(i)));
                     statementFriend.executeUpdate();
                 }
                 catch (SQLException e){
@@ -179,31 +179,5 @@ public class FriendshipDBTest {
         Repository<Pair<Long>,Friendship> friendship_repo = factory.createFriendshipRepository(friendshipValidator);
 
         ConcreteRepoTestHelper.errorAdd(user_repo,friendship_repo);
-    }
-    @Test
-    public void testDoubleFriendAdd(){
-        PropertyFactory propertyFactory = new PropertyFactory();
-        RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile("test_data/Resources/db_test.properties"));
-
-        Validator<User> userValidator = new UserValidator();
-        Validator<Friendship> friendshipValidator = new FriendshipValidator();
-
-        Repository<Long,User> user_repo = factory.createUserRepository(userValidator);
-        Repository<Pair<Long>,Friendship> friendship_repo = factory.createFriendshipRepository(friendshipValidator);
-
-        ConcreteRepoTestHelper.doubleFriendAdd(user_repo,friendship_repo);
-    }
-    @Test
-    public void testFriendshipDelete(){
-        PropertyFactory propertyFactory = new PropertyFactory();
-        RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile("test_data/Resources/db_test.properties"));
-
-        Validator<User> userValidator = new UserValidator();
-        Validator<Friendship> friendshipValidator = new FriendshipValidator();
-
-        Repository<Long,User> user_repo = factory.createUserRepository(userValidator);
-        Repository<Pair<Long>,Friendship> friendship_repo = factory.createFriendshipRepository(friendshipValidator);
-
-        ConcreteRepoTestHelper.friendshipDelete(user_repo,friendship_repo);
     }
 }

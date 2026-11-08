@@ -19,17 +19,6 @@ import java.util.Optional;
 public class BasicUserService {
     protected final Repository<Long, User> repository;
     private final Validator<User> validator;
-    private Long nextID;
-
-    private void setNextID(){
-        Optional<User> maxUser = repository.findAll(DefaultFilters::filterTrue).stream().max(Comparator.comparing(User::getId));
-        if(maxUser.isPresent()) {
-            nextID = maxUser.get().getId() + 1;
-        }
-        else{
-            nextID = 1L;
-        }
-    }
 
     /**
      * This function creates a user service and sets the next available user ID.
@@ -37,16 +26,14 @@ public class BasicUserService {
      */
     public BasicUserService(Repository<Long, User> repository){
         this.repository = repository;
-        this.validator = new UserValidator().andThen((user) -> {
+        this.validator = new UserValidator();/*.andThen((user) -> {
             if(!user.getName().matches("[a-zA-Z -]+")){
                 throw new ValidationException("The name must contain only letters!");
             }
             if(!user.getFirstName().matches("[a-zA-Z -]+")){
                 throw new ValidationException("The first name must contain only letters!");
             }
-        });
-        nextID = 0L;
-        setNextID();
+        });*/
     }
 
     /**
@@ -58,10 +45,9 @@ public class BasicUserService {
      * @throws RepositoryException if the user cannot be added to the repository;
      */
     public void addUser(String name, String firstName) {
-        User new_user = new User(nextID,name,firstName);
+        User new_user = new User(1L,name,firstName);
         validator.validate(new_user);
         repository.addElement(new_user);
-        nextID += 1;
     }
 
     /**

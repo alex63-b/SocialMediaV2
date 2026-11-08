@@ -19,20 +19,7 @@ import java.util.function.Predicate;
 public class UserDBRepository implements Repository<Long, User> {
     private final String url, user, password;
     private final Validator<User> userValidator;
-    private int size = 0;
 
-    private void setFirstSize(){
-        try(Connection connection = DriverManager.getConnection(url, user, password)){
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users");
-            ResultSet resultSet = statement.executeQuery();
-            while(resultSet.next()){
-                size += 1;
-            }
-        }
-        catch (SQLException exception){
-            throw new RepositoryException("The size script didn't work!",exception.getCause());
-        }
-    }
     /**
      * This function creates a user database repository with the specified connection settings.
      * @param userValidator the validator used for users;
@@ -45,7 +32,6 @@ public class UserDBRepository implements Repository<Long, User> {
         this.url = url;
         this.user = user;
         this.password = password;
-        setFirstSize();
     }
 
     /**
@@ -54,7 +40,17 @@ public class UserDBRepository implements Repository<Long, User> {
      */
     @Override
     public int size() {
-        return size;
+        try(Connection connection = DriverManager.getConnection(url, user, password)){
+            PreparedStatement statement = connection.prepareStatement("SELECT count(*) AS count FROM users;");
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()){
+                return resultSet.getInt(1);
+            }
+            return 0;
+        }
+        catch (SQLException exception){
+            throw new RepositoryException("The size script didn't work!",exception.getCause());
+        }
     }
     /**
      * Returns the users in the repository that are accepted by the filter.
@@ -130,12 +126,16 @@ public class UserDBRepository implements Repository<Long, User> {
             PreparedStatement statement = connection.prepareStatement("INSERT INTO users(first_name, last_name) VALUES (?,?)");
             statement.setString(1,new_element.getFirstName());
             statement.setString(2,new_element.getName());
-            statement.executeUpdate();
-            size += 1;
-            return Optional.of(new_element);
+            try {
+                statement.executeUpdate();
+                return Optional.of(new_element);
+            }
+            catch (SQLException e) {
+                throw new RepositoryException("The names can't be null!",e.getCause());
+            }
         }
         catch (SQLException e){
-            throw new RepositoryException("SQL add error: " + e.getMessage(),e.getCause());
+            throw new RepositoryException("The connection to the user database couldn't be formed!",e.getCause());
         }
     }
 
@@ -158,11 +158,10 @@ public class UserDBRepository implements Repository<Long, User> {
             PreparedStatement statement = connection.prepareStatement("DELETE FROM users WHERE id=?");
             statement.setLong(1,id);
             statement.executeUpdate();
-            size -= 1;
             return foundUser;
         }
         catch (SQLException e){
-            throw new RepositoryException("SQL delete error: " + e.getMessage(), e.getCause());
+            throw new RepositoryException("The connection to the user database couldn't be formed!",e.getCause());
         }
     }
 
@@ -190,11 +189,16 @@ public class UserDBRepository implements Repository<Long, User> {
             statement.setString(1,new_element.getFirstName());
             statement.setString(2,new_element.getName());
             statement.setLong(3,new_element.getId());
-            statement.executeUpdate();
-            return Optional.empty();
+            try {
+                statement.executeUpdate();
+                return Optional.empty();
+            }
+            catch (SQLException e) {
+                throw new RepositoryException("The names can't be null!",e.getCause());
+            }
         }
         catch (SQLException e){
-            throw new RepositoryException("SQL modify error: " + e.getMessage(), e.getCause());
+            throw new RepositoryException("The connection to the user database couldn't be formed!",e.getCause());
         }
     }
 }

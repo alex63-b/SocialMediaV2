@@ -8,7 +8,6 @@ import java.util.HashSet;
 public class User extends Entity<Long>{
     private final String name;
     private final String firstName;
-    private final HashSet<User> friends;
 
     /**
      * This function creates a user with the specified ID, name, and first name.
@@ -20,7 +19,6 @@ public class User extends Entity<Long>{
         super(id);
         this.name = name;
         this.firstName = firstName;
-        friends = new HashSet<>();
     }
 
     /**
@@ -47,30 +45,6 @@ public class User extends Entity<Long>{
      */
     public String getFirstName() {
         return firstName;
-    }
-
-    /**
-     * This function returns the set of users who are friends with this user.
-     * @return the set of the user's friends;
-     */
-    public HashSet<User> getFriends(){
-        return friends;
-    }
-
-    /**
-     * This function adds a user to this user's set of friends.
-     * @param newFriend the user to add as a friend;
-     */
-    public void addFriend(User newFriend){
-        friends.add(newFriend);
-    }
-
-    /**
-     * This function removes a user from this user's set of friends.
-     * @param newFriend the user to remove from the set of friends;
-     */
-    public void removeFriend(User newFriend){
-        friends.remove(newFriend);
     }
 
     /**

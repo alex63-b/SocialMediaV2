@@ -76,22 +76,4 @@ public class MemoryFriendshipRepoTest {
 
         ConcreteRepoTestHelper.errorAdd(user_repo,friendship_repo);
     }
-    @Test
-    public void testDoubleFriendAdd(){
-        Validator<User> userValidator = new UserValidator();
-        Validator<Friendship> friendshipValidator = new FriendshipValidator();
-        MemoryUserRepository userRepo = createUserRepo(userValidator);
-        MemoryFriendshipRepository friendship_repo = createFriendshipRepo(friendshipValidator,userRepo);
-
-        ConcreteRepoTestHelper.doubleFriendAdd(userRepo,friendship_repo);
-    }
-    @Test
-    public void testFriendshipDelete(){
-        Validator<User> userValidator = new UserValidator();
-        Validator<Friendship> friendshipValidator = new FriendshipValidator();
-        MemoryUserRepository userRepo = createUserRepo(userValidator);
-        MemoryFriendshipRepository friendshipRepo = createFriendshipRepo(friendshipValidator,userRepo);
-
-        ConcreteRepoTestHelper.friendshipDelete(userRepo,friendshipRepo);
-    }
 }

@@ -11,27 +11,11 @@ class UserTest {
         assertEquals("a@b.c", new_user.getFirstName());
         assertEquals("lol",new_user.getName());
         assertEquals(1L,new_user.getId());
-        assertTrue(new_user.getFriends().isEmpty());
     }
     @Test
     void test_toString(){
         User new_user = new User(2L,"John Doe","Macaroni");
         assertEquals("2. The user John Doe Macaroni;",new_user.toString());
-    }
-    @Test
-    void test_addFriend(){
-        User new_user = new User(2L,"John Doe","johndoe@gmail.com");
-        User friend = new User(3L,"Luke Castellan","hermes@gmail.com");
-        new_user.addFriend(friend);
-        assertEquals(1,new_user.getFriends().size());
-    }
-    @Test
-    void test_removeFriend(){
-        User new_user = new User(2L,"John Doe","johndoe@gmail.com");
-        User friend = new User(3L,"Luke Castellan","hermes@gmail.com");
-        new_user.addFriend(friend);
-        new_user.removeFriend(friend);
-        assertEquals(0,new_user.getFriends().size());
     }
     @Test
     void testEqualsEveryField(){

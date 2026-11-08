@@ -25,19 +25,8 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
     private final Validator<Friendship> friendshipValidator;
     private final Repository<Long,User> userRepo;
     private final FriendshipHelper helper;
-    private int size = 0;
-
     private void setFirstSize(){
-        try(Connection connection = DriverManager.getConnection(url, user, password)){
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM friendships");
-            ResultSet resultSet = statement.executeQuery();
-            while(resultSet.next()){
-                size += 1;
-            }
-        }
-        catch (SQLException exception){
-            throw new RepositoryException("The size script didn't work!",exception.getCause());
-        }
+
     }
     /**
      * This function creates a friendship database repository with the specified connection settings.
@@ -62,7 +51,17 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
      */
     @Override
     public int size() {
-        return size;
+        try(Connection connection = DriverManager.getConnection(url, user, password)){
+            PreparedStatement statement = connection.prepareStatement("SELECT count(*) AS count FROM friendships;");
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()){
+                return resultSet.getInt(1);
+            }
+            return 0;
+        }
+        catch (SQLException exception){
+            throw new RepositoryException("The size script didn't work!",exception.getCause());
+        }
     }
 
     /**
@@ -87,13 +86,13 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
                     }
                 }
                 else{
-                    throw new RepositoryException("The users with these ID's don't exist in the repository",new InvalidParameterException());
+                    throw new RepositoryException("The users with these ID's don't exist in the repository!",new InvalidParameterException());
                 }
             }
             return userList;
         }
         catch (SQLException e){
-            throw new RepositoryException("SQL findAll error: " + e.getMessage(),e.getCause());
+            throw new RepositoryException("The connection to the friendship database couldn't be formed!",e.getCause());
         }
     }
 
@@ -117,7 +116,7 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
                 Optional<User> user1 = userRepo.findElement(id.getFirstElement());
                 Optional<User> user2 = userRepo.findElement(id.getSecondElement());
                 if(user1.isPresent() && user2.isPresent()) {
-                    LocalDateTime date = LocalDateTime.of(resultSet.getDate("friendshipDate").toLocalDate(), LocalTime.MIDNIGHT);
+                    LocalDateTime date = resultSet.getTimestamp("friendshipDate").toLocalDateTime();
                     return Optional.of(new Friendship(user1.get(), user2.get(), date));
                 }
                 else{
@@ -127,7 +126,7 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
             return Optional.empty();
         }
         catch(SQLException ex){
-            throw new RepositoryException("SQL findElement error: " + ex.getMessage(), ex.getCause());
+            throw new RepositoryException("The connection to the friendship database couldn't be formed!",ex.getCause());
         }
     }
 
@@ -151,17 +150,18 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
             PreparedStatement statement = connection.prepareStatement("INSERT INTO friendships(id1, id2, friendshipDate) VALUES (?,?,?)");
             statement.setLong(1,new_friendship.getFriend1().getId());
             statement.setLong(2,new_friendship.getFriend2().getId());
-            statement.setDate(3,Date.valueOf(new_friendship.getDate().toLocalDate()));
-            statement.executeUpdate();
+            statement.setTimestamp(3, Timestamp.valueOf(new_friendship.getDate()));
+            try {
+                statement.executeUpdate();
 
-            new_friendship.getFriend1().addFriend(new_friendship.getFriend2());
-            new_friendship.getFriend2().addFriend(new_friendship.getFriend1());
-
-            size += 1;
-            return Optional.of(new_friendship);
+                return Optional.of(new_friendship);
+            }
+            catch (SQLException e){
+                throw new RepositoryException("The ID's of the users must exist in the user list!",e.getCause());
+            }
         }
         catch (SQLException e){
-            throw new RepositoryException("SQL add error: " + e.getMessage(),e.getCause());
+            throw new RepositoryException("The connection to the friendship database couldn't be formed!",e.getCause());
         }
     }
 
@@ -183,19 +183,15 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
         try(Connection connection = DriverManager.getConnection(url,user,password)){
             Friendship oldFriendship = foundFriendship.get();
 
-            oldFriendship.getFriend1().removeFriend(oldFriendship.getFriend2());
-            oldFriendship.getFriend2().removeFriend(oldFriendship.getFriend1());
-
             PreparedStatement statement = connection.prepareStatement("DELETE FROM friendships WHERE id1=? AND id2=?");
             statement.setLong(1,id.getFirstElement());
             statement.setLong(2,id.getSecondElement());
             statement.executeUpdate();
 
-            size -= 1;
             return foundFriendship;
         }
         catch (SQLException e){
-            throw new RepositoryException("SQL delete error: " + e.getMessage(), e.getCause());
+            throw new RepositoryException("The connection to the friendship database couldn't be formed!",e.getCause());
         }
     }
 
@@ -220,14 +216,19 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
         }
         try(Connection connection = DriverManager.getConnection(url,user,password)){
             PreparedStatement statement = connection.prepareStatement("UPDATE friendships SET friendshipdate=? WHERE id1=? AND id2=?");
-            statement.setDate(1,Date.valueOf(new_friendship.getDate().toLocalDate()));
+            statement.setTimestamp(1,Timestamp.valueOf(new_friendship.getDate()));
             statement.setLong(2,new_friendship.getFriend1().getId());
             statement.setLong(3,new_friendship.getFriend2().getId());
-            statement.executeUpdate();
-            return Optional.empty();
+            try {
+                statement.executeUpdate();
+                return Optional.empty();
+            }
+            catch (SQLException e) {
+                throw new RepositoryException("The date cannot be null!",e.getCause());
+            }
         }
         catch (SQLException e){
-            throw new RepositoryException("SQL modify error: " + e.getMessage(), e.getCause());
+            throw new RepositoryException("The connection to the friendship database couldn't be formed!",e.getCause());
         }
     }
 }

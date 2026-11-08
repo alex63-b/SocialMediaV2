@@ -88,7 +88,7 @@ class RepositoryFactoryTest {
 
         if(friendshipFileRepo.findElement(new Pair<>(1L,3L)).isPresent() && friendshipFileRepo.findElement(new Pair<>(3L,2L)).isPresent()) {
             assertEquals("John Doe", friendshipFileRepo.findElement(new Pair<>(1L, 3L)).get().getFriend1().getName());
-            assertEquals("Luke Scott", friendshipFileRepo.findElement(new Pair<>(3L, 2L)).get().getFriend1().getName());
+            assertEquals("Luke Scott", friendshipFileRepo.findElement(new Pair<>(3L, 2L)).get().getFriend2().getName());
         }
         else{
             fail();
