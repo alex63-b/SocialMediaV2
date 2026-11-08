@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.sql.*;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class UserDBTest {
     public void tearDown(){
         reloadDBData();
     }
+
     private void reloadDBData(){
         List<String> nameList = List.of("John Doe","Phil Smith","Luke Scott");
         List<String> firstNameList = List.of("johndoe@gmail.com","philsmith@gmail.com","lukescott@gmail.com");
@@ -46,11 +48,13 @@ public class UserDBTest {
         try(Connection connection = DriverManager.getConnection(url,user,password)){
             PreparedStatement statementDelete = connection.prepareStatement("DELETE FROM users");
             statementDelete.executeUpdate();
+            PreparedStatement statementResetId = connection.prepareStatement("ALTER SEQUENCE users_id_seq RESTART WITH 1");
+            statementResetId.executeUpdate();
             IntStream.range(0,3).forEach((i) -> {
                 try {
                     PreparedStatement statement = connection.prepareStatement(insertSql);
-                    statement.setString(1, nameList.get(i));
-                    statement.setString(2, firstNameList.get(i));
+                    statement.setString(2, nameList.get(i));
+                    statement.setString(1, firstNameList.get(i));
                     statement.executeUpdate();
                 }
                 catch (SQLException e){
@@ -127,6 +131,7 @@ public class UserDBTest {
         User right_user = new User(4L,"Mike","Forge");
 
         assertEquals(Optional.of(right_user),new_repo.addElement(right_user));
+        assertEquals(4,new_repo.size());
 
         if(new_repo.findElement(4L).isPresent()) {
             assertEquals(right_user, new_repo.findElement(4L).get());
@@ -135,10 +140,10 @@ public class UserDBTest {
             fail();
         }
 
-        User wrong_user = new User(3L,"John Doe","");
+        User wrong_user = new User(9L,"John Doe","");
 
         assertThrows(ValidationException.class,() -> new_repo.addElement(wrong_user));
-        assertThrows(ValidationException.class,() -> new_repo.addElement(null));
+        assertThrows(RepositoryException.class,() -> new_repo.addElement(null));
         assertFalse(new_repo.addElement(right_user).isPresent());
     }
 
@@ -152,8 +157,10 @@ public class UserDBTest {
         Optional<User> test_user = new_repo.findElement(2L);
 
         assertFalse(new_repo.deleteElement(5L).isPresent());
+
         assertEquals(test_user,new_repo.deleteElement(2L));
 
+        assertEquals(2,new_repo.size());
         assertFalse(new_repo.findElement(2L).isPresent());
     }
 

@@ -7,6 +7,7 @@ import Domain.Validation.ValidationException;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.MemoryRepository;
 import Repository.AbstractRepositories.ObservableUserRepository;
+import Repository.AbstractRepositories.Repository;
 import Repository.Exceptions.RepositoryException;
 import Repository.Helpers.FriendshipHelper;
 import Repository.Observer.FriendshipObserver;
@@ -60,11 +61,12 @@ public class MemoryFriendshipRepository extends MemoryRepository<Pair<Long>, Fri
      */
     @Override
     public Optional<Friendship> addElement(Friendship new_element) throws RepositoryException, RepositoryException {
-        friendshipHelper.validateRelations(new_element,user_repo,this);
         Optional<Friendship> result = super.addElement(new_element);
-        if(result.isPresent()) {
-            addFriendsAfterAdd(new_element);
+        if(result.isEmpty()){
+            return result;
         }
+        friendshipHelper.validateRelations(new_element, user_repo, this);
+        addFriendsAfterAdd(new_element);
         return result;
     }
 

@@ -2,9 +2,17 @@ package Repository.ConcreteRepositories;
 
 import Domain.Objects.Friendship;
 import Domain.Objects.Pair;
+import Domain.Objects.User;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
+import Repository.Exceptions.RepositoryException;
+import Repository.Helpers.FriendshipHelper;
 
+import java.security.InvalidParameterException;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -15,7 +23,22 @@ import java.util.function.Predicate;
 public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship> {
     private final String url, user, password;
     private final Validator<Friendship> friendshipValidator;
+    private final Repository<Long,User> userRepo;
+    private final FriendshipHelper helper;
+    private int size = 0;
 
+    private void setFirstSize(){
+        try(Connection connection = DriverManager.getConnection(url, user, password)){
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM friendships");
+            ResultSet resultSet = statement.executeQuery();
+            while(resultSet.next()){
+                size += 1;
+            }
+        }
+        catch (SQLException exception){
+            throw new RepositoryException("The size script didn't work!",exception.getCause());
+        }
+    }
     /**
      * This function creates a friendship database repository with the specified connection settings.
      * @param friendshipValidator the validator used for friendships;
@@ -23,11 +46,14 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
      * @param user the database username;
      * @param password the database password;
      */
-    public FriendshipDBRepository(Validator<Friendship> friendshipValidator, String url, String user, String password){
+    public FriendshipDBRepository(Repository<Long,User> userRepo, Validator<Friendship> friendshipValidator, String url, String user, String password){
+        this.userRepo = userRepo;
         this.friendshipValidator = friendshipValidator;
         this.url = url;
         this.user = user;
         this.password = password;
+        this.helper = FriendshipHelper.getFriendshipHelper();
+        setFirstSize();
     }
 
     /**
@@ -36,7 +62,7 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
      */
     @Override
     public int size() {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        return size;
     }
 
     /**
@@ -46,7 +72,29 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
      */
     @Override
     public List<Friendship> findAll(Predicate<Friendship> filter) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM friendships ORDER BY id1, id2");
+            ResultSet set = statement.executeQuery();
+            List<Friendship> userList = new ArrayList<>();
+            while(set.next()){
+                Long id1 = set.getLong("id1");
+                Long id2 = set.getLong("id2");
+                LocalDateTime date = LocalDateTime.of(set.getDate("friendshipDate").toLocalDate(), LocalTime.MIDNIGHT);
+                if(userRepo.findElement(id1).isPresent() && userRepo.findElement(id2).isPresent()) {
+                    Friendship newFriendship = new Friendship(userRepo.findElement(id1).get(), userRepo.findElement(id2).get(), date);
+                    if (filter.test(newFriendship)) {
+                        userList.add(newFriendship);
+                    }
+                }
+                else{
+                    throw new RepositoryException("The users with these ID's don't exist in the repository",new InvalidParameterException());
+                }
+            }
+            return userList;
+        }
+        catch (SQLException e){
+            throw new RepositoryException("SQL findAll error: " + e.getMessage(),e.getCause());
+        }
     }
 
     /**
@@ -57,7 +105,30 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
      */
     @Override
     public Optional<Friendship> findElement(Pair<Long> id) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        if(id == null){
+            throw new RepositoryException("The id can't be null!",new InvalidParameterException());
+        }
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM friendships WHERE id1=? AND id2=?");
+            statement.setLong(1,id.getFirstElement());
+            statement.setLong(2,id.getSecondElement());
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()){
+                Optional<User> user1 = userRepo.findElement(id.getFirstElement());
+                Optional<User> user2 = userRepo.findElement(id.getSecondElement());
+                if(user1.isPresent() && user2.isPresent()) {
+                    LocalDateTime date = LocalDateTime.of(resultSet.getDate("friendshipDate").toLocalDate(), LocalTime.MIDNIGHT);
+                    return Optional.of(new Friendship(user1.get(), user2.get(), date));
+                }
+                else{
+                    throw new RepositoryException("The users with these ID's don't exist in the repository",new InvalidParameterException());
+                }
+            }
+            return Optional.empty();
+        }
+        catch(SQLException ex){
+            throw new RepositoryException("SQL findElement error: " + ex.getMessage(), ex.getCause());
+        }
     }
 
     /**
@@ -69,7 +140,29 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
      */
     @Override
     public Optional<Friendship> addElement(Friendship new_friendship) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        if(new_friendship == null){
+            throw new RepositoryException("The new friendship can't be null!", new InvalidParameterException());
+        }
+        if(findElement(new_friendship.getId()).isPresent()){
+            return Optional.empty();
+        }
+        friendshipValidator.validate(new_friendship);
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO friendships(id1, id2, friendshipDate) VALUES (?,?,?)");
+            statement.setLong(1,new_friendship.getFriend1().getId());
+            statement.setLong(2,new_friendship.getFriend2().getId());
+            statement.setDate(3,Date.valueOf(new_friendship.getDate().toLocalDate()));
+            statement.executeUpdate();
+
+            new_friendship.getFriend1().addFriend(new_friendship.getFriend2());
+            new_friendship.getFriend2().addFriend(new_friendship.getFriend1());
+
+            size += 1;
+            return Optional.of(new_friendship);
+        }
+        catch (SQLException e){
+            throw new RepositoryException("SQL add error: " + e.getMessage(),e.getCause());
+        }
     }
 
     /**
@@ -80,7 +173,30 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
      */
     @Override
     public Optional<Friendship> deleteElement(Pair<Long> id) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        if(id == null){
+            throw new RepositoryException("The ID must not be null!",new InvalidParameterException());
+        }
+        Optional<Friendship> foundFriendship = findElement(id);
+        if(foundFriendship.isEmpty()){
+            return Optional.empty();
+        }
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            Friendship oldFriendship = foundFriendship.get();
+
+            oldFriendship.getFriend1().removeFriend(oldFriendship.getFriend2());
+            oldFriendship.getFriend2().removeFriend(oldFriendship.getFriend1());
+
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM friendships WHERE id1=? AND id2=?");
+            statement.setLong(1,id.getFirstElement());
+            statement.setLong(2,id.getSecondElement());
+            statement.executeUpdate();
+
+            size -= 1;
+            return foundFriendship;
+        }
+        catch (SQLException e){
+            throw new RepositoryException("SQL delete error: " + e.getMessage(), e.getCause());
+        }
     }
 
     /**
@@ -92,6 +208,26 @@ public class FriendshipDBRepository implements Repository<Pair<Long>, Friendship
      */
     @Override
     public Optional<Friendship> modifyElement(Friendship new_friendship) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        if(new_friendship == null){
+            throw new RepositoryException("The new friendship can't be null!", new InvalidParameterException());
+        }
+        if(new_friendship.getId() == null){
+            throw new RepositoryException("The new friendship's ID can't be null!", new InvalidParameterException());
+        }
+        friendshipValidator.validate(new_friendship);
+        if(findElement(new_friendship.getId()).isEmpty()){
+            return Optional.of(new_friendship);
+        }
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            PreparedStatement statement = connection.prepareStatement("UPDATE friendships SET friendshipdate=? WHERE id1=? AND id2=?");
+            statement.setDate(1,Date.valueOf(new_friendship.getDate().toLocalDate()));
+            statement.setLong(2,new_friendship.getFriend1().getId());
+            statement.setLong(3,new_friendship.getFriend2().getId());
+            statement.executeUpdate();
+            return Optional.empty();
+        }
+        catch (SQLException e){
+            throw new RepositoryException("SQL modify error: " + e.getMessage(), e.getCause());
+        }
     }
 }

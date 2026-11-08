@@ -6,7 +6,9 @@ import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
 import Repository.Exceptions.RepositoryException;
 
+import java.security.InvalidParameterException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -24,7 +26,7 @@ public class UserDBRepository implements Repository<Long, User> {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM users");
             ResultSet resultSet = statement.executeQuery();
             while(resultSet.next()){
-                Long ceva = resultSet.getLong(0);
+                size += 1;
             }
         }
         catch (SQLException exception){
@@ -61,18 +63,51 @@ public class UserDBRepository implements Repository<Long, User> {
      */
     @Override
     public List<User> findAll(Predicate<User> filter) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users ORDER BY id");
+            ResultSet set = statement.executeQuery();
+            List<User> userList = new ArrayList<>();
+            while(set.next()){
+                String name = set.getString("last_name");
+                String firstName = set.getString("first_name");
+                Long id = set.getLong("id");
+                User newUser = new User(id,name,firstName);
+                if(filter.test(newUser)) {
+                    userList.add(newUser);
+                }
+            }
+            return userList;
+        }
+        catch (SQLException e){
+            throw new RepositoryException("SQL findAll error: " + e.getMessage(),e.getCause());
+        }
     }
 
     /**
      * Finds a user by its identifier.
      * @param id the identifier of the user to find;
      * @return the user with the specified identifier, or {@code Optional.empty()} if it does not exist;
-     * @throws Repository.Exceptions.RepositoryException if the identifier is null;
+     * @throws Repository.Exceptions.RepositoryException if the identifier is null or the SQL connection doesn't work;
      */
     @Override
     public Optional<User> findElement(Long id) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        if(id == null){
+            throw new RepositoryException("The ID can't be null!",new InvalidParameterException());
+        }
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE id=?");
+            statement.setLong(1,id);
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()){
+                String name = resultSet.getString("last_name");
+                String firstName = resultSet.getString("first_name");
+                return Optional.of(new User(id,name,firstName));
+            }
+            return Optional.empty();
+        }
+        catch(SQLException ex){
+            throw new RepositoryException("SQL findElement error: " + ex.getMessage(), ex.getCause());
+        }
     }
 
     /**
@@ -84,7 +119,24 @@ public class UserDBRepository implements Repository<Long, User> {
      */
     @Override
     public Optional<User> addElement(User new_element) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        if(new_element == null){
+            throw new RepositoryException("The new user can't be null!",new InvalidParameterException());
+        }
+        if(findElement(new_element.getId()).isPresent()){
+            return Optional.empty();
+        }
+        userValidator.validate(new_element);
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO users(first_name, last_name) VALUES (?,?)");
+            statement.setString(1,new_element.getFirstName());
+            statement.setString(2,new_element.getName());
+            statement.executeUpdate();
+            size += 1;
+            return Optional.of(new_element);
+        }
+        catch (SQLException e){
+            throw new RepositoryException("SQL add error: " + e.getMessage(),e.getCause());
+        }
     }
 
     /**
@@ -95,7 +147,23 @@ public class UserDBRepository implements Repository<Long, User> {
      */
     @Override
     public Optional<User> deleteElement(Long id) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        if(id == null){
+            throw new RepositoryException("The ID for delete can't be null!",new InvalidParameterException());
+        }
+        Optional<User> foundUser = findElement(id);
+        if(foundUser.isEmpty()){
+            return Optional.empty();
+        }
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM users WHERE id=?");
+            statement.setLong(1,id);
+            statement.executeUpdate();
+            size -= 1;
+            return foundUser;
+        }
+        catch (SQLException e){
+            throw new RepositoryException("SQL delete error: " + e.getMessage(), e.getCause());
+        }
     }
 
     /**
@@ -107,6 +175,26 @@ public class UserDBRepository implements Repository<Long, User> {
      */
     @Override
     public Optional<User> modifyElement(User new_element) {
-        throw new UnsupportedOperationException("This operation is not implemented yet!");
+        if(new_element == null){
+            throw new RepositoryException("The new user can't be null!",new InvalidParameterException());
+        }
+        if(new_element.getId() == null){
+            throw new RepositoryException("The new user's ID can't be null!",new InvalidParameterException());
+        }
+        userValidator.validate(new_element);
+        if(findElement(new_element.getId()).isEmpty()){
+            return Optional.of(new_element);
+        }
+        try(Connection connection = DriverManager.getConnection(url,user,password)){
+            PreparedStatement statement = connection.prepareStatement("UPDATE users SET first_name=?,last_name=? WHERE id=?");
+            statement.setString(1,new_element.getFirstName());
+            statement.setString(2,new_element.getName());
+            statement.setLong(3,new_element.getId());
+            statement.executeUpdate();
+            return Optional.empty();
+        }
+        catch (SQLException e){
+            throw new RepositoryException("SQL modify error: " + e.getMessage(), e.getCause());
+        }
     }
 }

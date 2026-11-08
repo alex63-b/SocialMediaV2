@@ -62,8 +62,8 @@ public class BasicFriendshipServiceTest {
         Repository<Pair<Long>,Friendship> friendship_repo = new FriendshipFileRepository(user_repo,friendshipValidator,friendship_path);
         BasicFriendshipService service = new BasicFriendshipService(friendship_repo,user_repo);
 
-        assertThrows(RepositoryException.class,() -> service.addFriendship(1L,3L));
-        assertThrows(RepositoryException.class,() -> service.addFriendship(3L,1L));
+        assertThrows(ValidationException.class,() -> service.addFriendship(1L,3L));
+        assertThrows(ValidationException.class,() -> service.addFriendship(3L,1L));
         assertThrows(ValidationException.class,() -> service.addFriendship(-1L,-3L));
 
         service.addFriendship(1L,2L);

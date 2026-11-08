@@ -45,7 +45,10 @@ public class BasicFriendshipService {
         User friend1 = userRepo.findElement(userId1).get();
         User friend2 = userRepo.findElement(userId2).get();
         Friendship new_friendship = new Friendship(friend1,friend2,LocalDateTime.now());
-        friendshipRepo.addElement(new_friendship);
+        Optional<Friendship> optionalFriendship = friendshipRepo.addElement(new_friendship);
+        if(optionalFriendship.isEmpty()){
+            throw new ValidationException("The friendship already exists in the repository!");
+        }
     }
 
     /**

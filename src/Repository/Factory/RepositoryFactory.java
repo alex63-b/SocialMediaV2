@@ -62,7 +62,7 @@ public class RepositoryFactory {
                 },
                 RepositoryType.DATABASE,(validator) -> {
                     validateDBParameters();
-                    return new FriendshipDBRepository(validator,properties.getProperty("db.url"),
+                    return new FriendshipDBRepository(userRepository,validator,properties.getProperty("db.url"),
                             properties.getProperty("db.user"),properties.getProperty("db.password"));
                 }
         );

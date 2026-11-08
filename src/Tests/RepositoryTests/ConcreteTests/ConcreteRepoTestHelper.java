@@ -8,12 +8,15 @@ import Repository.AbstractRepositories.Repository;
 import Repository.ConcreteRepositories.FriendshipFileRepository;
 import Repository.Exceptions.RepositoryException;
 import Repository.Helpers.DefaultFilters;
+import org.junit.jupiter.api.Assertions;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class ConcreteRepoTestHelper {
     public static void cascadeDelete(Repository<Long, User> userRepo, Repository<Pair<Long>, Friendship> friendshipRepo){
@@ -51,8 +54,8 @@ public class ConcreteRepoTestHelper {
         if(userRepo.findElement(1L).isPresent() && userRepo.findElement(3L).isPresent()) {
             User user1 = userRepo.findElement(1L).get();
             User user3 = userRepo.findElement(3L).get();
-            assertThrows(RepositoryException.class, () -> friendshipRepo.addElement(new Friendship(user1, user3, LocalDateTime.parse("2024-02-23T10:11:12"))));
-            assertThrows(RepositoryException.class, () -> friendshipRepo.addElement(new Friendship(user3, user1, LocalDateTime.parse("2024-02-23T10:11:12"))));
+            assertEquals(Optional.empty(),friendshipRepo.addElement(new Friendship(user1, user3, LocalDateTime.parse("2024-02-23T10:11:12"))));
+            assertEquals(Optional.empty(),friendshipRepo.addElement(new Friendship(user3, user1, LocalDateTime.parse("2024-02-23T10:11:12"))));
             assertThrows(ValidationException.class, () -> friendshipRepo.addElement(new Friendship(user1, user1, LocalDateTime.parse("2024-02-23T10:11:12"))));
 
             assertThrows(RepositoryException.class, () -> friendshipRepo.addElement(new Friendship(user3, new User(9L, "a", "b"), LocalDateTime.parse("2024-02-23T10:11:12"))));

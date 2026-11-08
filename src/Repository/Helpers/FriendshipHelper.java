@@ -30,15 +30,6 @@ public class FriendshipHelper {
         return helper;
     }
 
-    private void checkEqualFriendships(Friendship f1, Friendship f2) throws RepositoryException {
-        if (f1.getFriend1().equals(f2.getFriend1()) && f1.getFriend2().equals(f2.getFriend2())) {
-            throw new RepositoryException("There can't be more than one friendship with the same friends!",new KeyException());
-        }
-        if (f1.getFriend1().equals(f2.getFriend2()) && f1.getFriend2().equals(f2.getFriend1())) {
-            throw new RepositoryException("There can't be more than one friendship with the same friends!",new KeyException());
-        }
-    }
-
     /**
      * This function checks if a friendship is not in the repository yet, if it is made between two existing users and if the
      * friends that are in the new friendship have the same data as those in the repository. Otherwise, an exception will be
@@ -50,8 +41,6 @@ public class FriendshipHelper {
      * user repository, or if the users in the friendship aren't the same as the users in the user repository.
      */
     public void validateRelations(Friendship new_element, Repository<Long, User> user_repo, Repository<Pair<Long>, Friendship> friendshipRepo){
-        friendshipRepo.findAll(DefaultFilters::filterTrue)
-                .forEach(f1 -> checkEqualFriendships(f1, new_element));
         User friend1 = new_element.getFriend1();
         User friend2 = new_element.getFriend2();
         if(user_repo.findElement(friend1.getId()).isPresent() && user_repo.findElement(friend2.getId()).isPresent()){
