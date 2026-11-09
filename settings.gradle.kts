@@ -1,1 +1,1 @@
-rootProject.name = "curs6_handson"
+rootProject.name = "SMGradleTest"
