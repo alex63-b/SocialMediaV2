@@ -1,1 +1,1 @@
-rootProject.name = "SMGradleTest"
+rootProject.name = "SocialMedia"
