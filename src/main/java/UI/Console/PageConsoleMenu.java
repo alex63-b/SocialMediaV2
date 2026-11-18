@@ -1,11 +1,14 @@
 package UI.Console;
 
+import Domain.Objects.Friendship;
+import Domain.Objects.User;
 import Service.FriendshipServices.BasicFriendshipService;
 import Service.FriendshipServices.PageFriendshipService;
 import Service.UserServices.BasicUserService;
 import Service.UserServices.PageUserService;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -14,6 +17,7 @@ import java.util.Objects;
 public class PageConsoleMenu extends ConsoleMenu{
     private final PageFriendshipService fService;
     private final PageUserService uService;
+
     /**
      * This function creates a menu using the specified user and friendship services.
      * @param userService the service used for user operations, must have page support;
@@ -30,15 +34,17 @@ public class PageConsoleMenu extends ConsoleMenu{
         System.out.println("Choose an option from the menu:");
         System.out.println("1. Show all users(separated by pages);");
         System.out.println("2. Add a new user;");
-        System.out.println("3. Delete an existing user;");
-        System.out.println("4. Show all friendships(separated by pages);");
-        System.out.println("5. Add a new friendship;");
-        System.out.println("6. Delete an existing friendship;");
-        System.out.println("7. Show community count;");
-        System.out.println("8. Show the most sociable community;");
-        System.out.println("9. Filter the users by name;");
-        System.out.println("10. Show a user's friendships(separated by pages);");
-        System.out.println("11. Exit the application;");
+        System.out.println("3. Modify an existing user;");
+        System.out.println("4. Delete an existing user;");
+        System.out.println("5. Show all friendships(separated by pages);");
+        System.out.println("6. Add a new friendship;");
+        System.out.println("7. Modify an existing friendship;");
+        System.out.println("8. Delete an existing friendship;");
+        System.out.println("9. Show community count;");
+        System.out.println("10. Show the most sociable community;");
+        System.out.println("11. Filter the users by name;");
+        System.out.println("12. Show a user's friendships(separated by pages);");
+        System.out.println("13. Exit the application;");
     }
     @Override
     protected void showUsers() {
@@ -47,20 +53,28 @@ public class PageConsoleMenu extends ConsoleMenu{
             String option = "?";
             while (!Objects.equals(option, "q")) {
                 System.out.println("You are on page " + pageNumber);
-                uService.findOnPage(pageNumber).forEach(System.out::println);
+                List<User> users = uService.findOnPage(pageNumber);
+                users.forEach(System.out::println);
                 option = "";
                 while(option.isEmpty()) {
                     System.out.println("Insert the next option: n(next page), p(previous page), or q(quit)");
                     option = read.readLine();
                     switch (option){
                         case "n" -> {
-                            pageNumber += 1;
-                        }
-                        case "p" -> {
-                            if(pageNumber > 0){
-                                pageNumber -= 1;
+                            if(!users.isEmpty()) {
+                                pageNumber += 1;
                             }
                             else{
+                                System.out.println("You can't go to the next empty page!");
+                            }
+                        }
+                        case "p" -> {
+                            try{
+                                pageNumber -= 1;
+                                uService.findOnPage(pageNumber);
+                            }
+                            catch (IllegalArgumentException e) {
+                                pageNumber = 0;
                                 System.out.println("You can't go to negative pages!");
                             }
                         }
@@ -87,20 +101,28 @@ public class PageConsoleMenu extends ConsoleMenu{
             String option = "?";
             while (!Objects.equals(option, "q")) {
                 System.out.println("You are on page " + pageNumber);
-                fService.findOnPage(pageNumber).forEach(System.out::println);
+                List<Friendship> friendships = fService.findOnPage(pageNumber);
+                friendships.forEach(System.out::println);
                 option = "";
                 while(option.isEmpty()) {
                     System.out.println("Insert the next option: n(next page), p(previous page), or q(quit)");
                     option = read.readLine();
                     switch (option){
                         case "n" -> {
-                            pageNumber += 1;
-                        }
-                        case "p" -> {
-                            if(pageNumber > 0){
-                                pageNumber -= 1;
+                            if(!friendships.isEmpty()) {
+                                pageNumber += 1;
                             }
                             else{
+                                System.out.println("You can't go to the next empty page!");
+                            }
+                        }
+                        case "p" -> {
+                            try{
+                                pageNumber -= 1;
+                                uService.findOnPage(pageNumber);
+                            }
+                            catch (IllegalArgumentException e) {
+                                pageNumber = 0;
                                 System.out.println("You can't go to negative pages!");
                             }
                         }
@@ -128,20 +150,28 @@ public class PageConsoleMenu extends ConsoleMenu{
             String option = "?";
             while (!Objects.equals(option, "q")) {
                 System.out.println("You are on page " + pageNumber);
-                fService.getUserFriendships(idNumber,pageNumber).forEach(System.out::println);
+                List<User> friendshipList = fService.getUserFriendships(idNumber,pageNumber);
+                friendshipList.forEach(System.out::println);
                 option = "";
                 while(option.isEmpty()) {
                     System.out.println("Insert the next option: n(next page), p(previous page), or q(quit)");
                     option = read.readLine();
                     switch (option){
                         case "n" -> {
-                            pageNumber += 1;
-                        }
-                        case "p" -> {
-                            if(pageNumber > 0){
-                                pageNumber -= 1;
+                            if(!friendshipList.isEmpty()) {
+                                pageNumber += 1;
                             }
                             else{
+                                System.out.println("You can't go to the next empty page!");
+                            }
+                        }
+                        case "p" -> {
+                            try{
+                                pageNumber -= 1;
+                                uService.findOnPage(pageNumber);
+                            }
+                            catch (IllegalArgumentException e) {
+                                pageNumber = 0;
                                 System.out.println("You can't go to negative pages!");
                             }
                         }

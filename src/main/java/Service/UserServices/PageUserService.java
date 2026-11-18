@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class PageUserService extends BasicUserService{
     private final int pageSize;
+    private final PagingRepository<Long,User> userRepo;
     /**
      * This function creates a user service and sets the next available user ID.
      *
@@ -21,6 +22,7 @@ public class PageUserService extends BasicUserService{
      */
     public PageUserService(PagingRepository<Long, User> repository, int pageSize) {
         this.pageSize = pageSize;
+        this.userRepo = repository;
         super(repository);
     }
 
@@ -31,7 +33,6 @@ public class PageUserService extends BasicUserService{
      * @throws IllegalArgumentException if the page number is negative(shouldn't happen naturally)
      */
     public List<User> findOnPage(int pageNumber) throws IllegalArgumentException{
-        PagingRepository<Long,User> userRepo = (PagingRepository<Long,User>)repository;
         return (List<User>) userRepo.findAllOnPage(new Pageable(pageNumber,pageSize)).getElementsOnPage();
     }
 }

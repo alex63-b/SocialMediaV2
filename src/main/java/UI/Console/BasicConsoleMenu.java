@@ -30,15 +30,17 @@ public class BasicConsoleMenu extends ConsoleMenu{
         System.out.println("Choose an option from the menu:");
         System.out.println("1. Show all users;");
         System.out.println("2. Add a new user;");
-        System.out.println("3. Delete an existing user;");
-        System.out.println("4. Show all friendships;");
-        System.out.println("5. Add a new friendship;");
-        System.out.println("6. Delete an existing friendship;");
-        System.out.println("7. Show community count;");
-        System.out.println("8. Show the most sociable community;");
-        System.out.println("9. Filter the users by name;");
-        System.out.println("10. Show a user's friendships;");
-        System.out.println("11. Exit the application;");
+        System.out.println("3. Modify an existing user;");
+        System.out.println("4. Delete an existing user;");
+        System.out.println("5. Show all friendships;");
+        System.out.println("6. Add a new friendship;");
+        System.out.println("7. Modify an existing friendship;");
+        System.out.println("8. Delete an existing friendship;");
+        System.out.println("9. Show community count;");
+        System.out.println("10. Show the most sociable community;");
+        System.out.println("11. Filter the users by name;");
+        System.out.println("12. Show a user's friendships;");
+        System.out.println("13. Exit the application;");
     }
     @Override
     protected void showUsers(){

@@ -10,6 +10,7 @@ import Repository.Helpers.DefaultFilters;
 import Repository.Helpers.DefaultSuppliers;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -60,6 +61,29 @@ public class BasicFriendshipService {
     public void deleteFriendship(Long friendId1, Long friendId2){
         if(friendshipRepo.deleteElement(new OrderedPair<>(friendId1,friendId2)).isEmpty()){
             throw new ValidationException("The ID's of the friends don't exist!");
+        }
+    }
+
+    /**
+     * This function updates the friendship between these users with a new date.
+     * @param userId1 the id of the first user of the friendship;
+     * @param userId2 the id of the second user of the friendship;
+     * @param date the new date and time of the friendship;
+     */
+    public void updateFriendship(Long userId1, Long userId2, String date){
+        if(userRepo.findElement(userId1).isEmpty() || userRepo.findElement(userId2).isEmpty()){
+            throw new ValidationException("The users with these ID's don't exist in the list of users!");
+        }
+        User friend1 = userRepo.findElement(userId1).get();
+        User friend2 = userRepo.findElement(userId2).get();
+        try {
+            LocalDateTime newDate = LocalDateTime.parse(date);
+            if (friendshipRepo.modifyElement(new Friendship(friend1, friend2, newDate)).isPresent()) {
+                throw new ValidationException("The friendship with this ID doesn't exist!");
+            }
+        }
+        catch (DateTimeParseException e){
+            throw new ValidationException("The new data couldn't be parsed!(must be in ISO format)");
         }
     }
     private Map<Long,List<Long>> getAdjacencyList(){
