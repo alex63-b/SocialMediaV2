@@ -1,11 +1,13 @@
 package Domain.Objects;
 
+import util.datatypes.OrderedPair;
+
 import java.time.LocalDateTime;
 
 /**
  * This class represents a friendship between two users, identified by their IDs and associated with a start date.
  */
-public class Friendship extends Entity<Pair<Long>> {
+public class Friendship extends Entity<OrderedPair<Long>> {
     private final User friend1;
     private final User friend2;
     private final LocalDateTime date;
@@ -17,7 +19,7 @@ public class Friendship extends Entity<Pair<Long>> {
      * @param date the date and time when the friendship started;
      */
     public Friendship(User friend1, User friend2, LocalDateTime date) {
-        super(new Pair<>(friend1.getId(),friend2.getId()));
+        super(new OrderedPair<>(friend1.getId(),friend2.getId()));
         this.date = date;
         if(friend1.getId() > friend2.getId()){
             this.friend2 = friend1;

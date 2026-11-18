@@ -1,16 +1,14 @@
 package RepositoryTests.ConcreteTests.File;
 
 import Domain.Objects.Friendship;
-import Domain.Objects.Pair;
+import util.datatypes.OrderedPair;
 import Domain.Objects.User;
 import Domain.Validation.FriendshipValidator;
 import Domain.Validation.UserValidator;
-import Domain.Validation.ValidationException;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
-import Repository.ConcreteRepositories.FriendshipFileRepository;
-import Repository.ConcreteRepositories.UserFileRepository;
-import Repository.Exceptions.RepositoryException;
+import Repository.ConcreteRepositories.File.FriendshipFileRepository;
+import Repository.ConcreteRepositories.File.UserFileRepository;
 import Repository.Helpers.DefaultFilters;
 import RepositoryTests.ConcreteTests.ConcreteRepoTestHelper;
 import org.junit.jupiter.api.AfterEach;
@@ -71,19 +69,19 @@ public class FriendshipFileRepositoryTest {
 
         FriendshipFileRepository friendship_repo = new FriendshipFileRepository(user_repo,friendshipValidator,friendship_path);
 
-        Repository<Pair<Long>, Friendship> empty_repo = new FriendshipFileRepository(user_repo,friendshipValidator,"a");
+        Repository<OrderedPair<Long>, Friendship> empty_repo = new FriendshipFileRepository(user_repo,friendshipValidator,"a");
         assertEquals(0,empty_repo.size());
 
-        if(friendship_repo.findElement(new Pair<>(1L,3L)).isPresent()) {
-            assertEquals("John Doe", friendship_repo.findElement(new Pair<>(1L, 3L)).get().getFriend1().getName());
-            assertEquals("Luke Scott", friendship_repo.findElement(new Pair<>(1L, 3L)).get().getFriend2().getName());
+        if(friendship_repo.findElement(new OrderedPair<>(1L,3L)).isPresent()) {
+            assertEquals("John Doe", friendship_repo.findElement(new OrderedPair<>(1L, 3L)).get().getFriend1().getName());
+            assertEquals("Luke Scott", friendship_repo.findElement(new OrderedPair<>(1L, 3L)).get().getFriend2().getName());
         }
         else{
             fail();
         }
-        if(friendship_repo.findElement(new Pair<>(3L,2L)).isPresent()) {
-            assertEquals("Luke Scott", friendship_repo.findElement(new Pair<>(3L, 2L)).get().getFriend2().getName());
-            assertEquals("Phil Smith", friendship_repo.findElement(new Pair<>(3L, 2L)).get().getFriend1().getName());
+        if(friendship_repo.findElement(new OrderedPair<>(3L,2L)).isPresent()) {
+            assertEquals("Luke Scott", friendship_repo.findElement(new OrderedPair<>(3L, 2L)).get().getFriend2().getName());
+            assertEquals("Phil Smith", friendship_repo.findElement(new OrderedPair<>(3L, 2L)).get().getFriend1().getName());
         }
         else{
             fail();

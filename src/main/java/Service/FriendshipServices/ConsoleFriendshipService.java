@@ -1,7 +1,7 @@
 package Service.FriendshipServices;
 
 import Domain.Objects.Friendship;
-import Domain.Objects.Pair;
+import util.datatypes.OrderedPair;
 import Domain.Objects.User;
 import Repository.AbstractRepositories.Repository;
 import Repository.Helpers.DefaultFilters;
@@ -15,7 +15,7 @@ public class ConsoleFriendshipService extends BasicFriendshipService {
      * @param friendshipRepo the repository used to store and retrieve friendships;
      * @param userRepo the repository used to store and retrieve users;
      */
-    public ConsoleFriendshipService(Repository<Pair<Long>, Friendship> friendshipRepo, Repository<Long, User> userRepo) {
+    public ConsoleFriendshipService(Repository<OrderedPair<Long>, Friendship> friendshipRepo, Repository<Long, User> userRepo) {
         super(friendshipRepo,userRepo);
     }
 

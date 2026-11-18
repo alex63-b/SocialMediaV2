@@ -13,3 +13,4 @@ CREATE TABLE IF NOT EXISTS friendships (
     CHECK (id1 < id2)
     );
 
+SELECT id,first_name,last_name FROM friendships INNER JOIN users ON id1=users.id OR id2=users.id WHERE (id1=2 OR id2=2) AND NOT id=2 ORDER BY id;

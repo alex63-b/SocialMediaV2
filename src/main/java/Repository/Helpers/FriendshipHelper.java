@@ -1,7 +1,7 @@
 package Repository.Helpers;
 
 import Domain.Objects.Friendship;
-import Domain.Objects.Pair;
+import util.datatypes.OrderedPair;
 import Domain.Objects.User;
 import Repository.AbstractRepositories.Repository;
 import Repository.Exceptions.RepositoryException;
@@ -40,7 +40,7 @@ public class FriendshipHelper {
      * @throws RepositoryException if the friendship already is in the repository, if the friendship isn't between 2 users in the
      * user repository, or if the users in the friendship aren't the same as the users in the user repository.
      */
-    public void validateRelations(Friendship new_element, Repository<Long, User> user_repo, Repository<Pair<Long>, Friendship> friendshipRepo){
+    public void validateRelations(Friendship new_element, Repository<Long, User> user_repo, Repository<OrderedPair<Long>, Friendship> friendshipRepo){
         User friend1 = new_element.getFriend1();
         User friend2 = new_element.getFriend2();
         if(user_repo.findElement(friend1.getId()).isPresent() && user_repo.findElement(friend2.getId()).isPresent()){
@@ -64,13 +64,13 @@ public class FriendshipHelper {
      * @param userRepo a user repository from where the friendships take their users;
      * @param friendshipRepo a friendship repository where the anomalies are handled;
      */
-    public void updateHelper(Repository<Long,User> userRepo, Repository<Pair<Long>,Friendship> friendshipRepo){
+    public void updateHelper(Repository<Long,User> userRepo, Repository<OrderedPair<Long>,Friendship> friendshipRepo){
         friendshipRepo.findAll(DefaultFilters::filterTrue).stream()
                 .map((f) -> {
                     Long friendId1 = f.getFriend1().getId();
                     Long friendId2 = f.getFriend2().getId();
                     if(userRepo.findElement(friendId1).isPresent() && userRepo.findElement(friendId2).isPresent()){
-                        return Optional.<Pair<Long>>empty();
+                        return Optional.<OrderedPair<Long>>empty();
                     }
                     else{
                         return Optional.of(f.getId());

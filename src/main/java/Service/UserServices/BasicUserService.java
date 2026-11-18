@@ -51,7 +51,6 @@ public class BasicUserService {
 
     /**
      * This function validates and adds a user using the next available ID.
-     * The {@code email} value is stored as the user's first name.
      * @param name the user's name;
      * @param firstName the value used as the user's first name;
      * @throws ValidationException if either user name field is empty;
@@ -62,6 +61,18 @@ public class BasicUserService {
         validator.validate(new_user);
         repository.addElement(new_user);
         nextID += 1;
+    }
+
+    /**
+     * This function validates and modifies a user with the given ID.
+     * @param id the id of the modified user;
+     * @param name the new name of the modified user;
+     * @param firstName the new first name of the modified user;
+     */
+    public void updateUser(Long id, String name, String firstName){
+        if(repository.modifyElement(new User(id,name,firstName)).isPresent()){
+            throw new ValidationException("The user with this ID doesn't exist!");
+        }
     }
 
     /**

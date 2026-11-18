@@ -1,27 +1,19 @@
 package RepositoryTests.ConcreteTests.Memory;
 
 import Domain.Objects.Friendship;
-import Domain.Objects.Pair;
 import Domain.Objects.User;
 import Domain.Validation.FriendshipValidator;
 import Domain.Validation.UserValidator;
-import Domain.Validation.ValidationException;
 import Domain.Validation.Validator;
-import Repository.AbstractRepositories.Repository;
-import Repository.ConcreteRepositories.FriendshipFileRepository;
-import Repository.ConcreteRepositories.MemoryFriendshipRepository;
-import Repository.ConcreteRepositories.MemoryUserRepository;
-import Repository.ConcreteRepositories.UserFileRepository;
+import Repository.ConcreteRepositories.Memory.MemoryFriendshipRepository;
+import Repository.ConcreteRepositories.Memory.MemoryUserRepository;
 import Repository.Exceptions.RepositoryException;
-import Repository.Helpers.DefaultFilters;
 import RepositoryTests.ConcreteTests.ConcreteRepoTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;

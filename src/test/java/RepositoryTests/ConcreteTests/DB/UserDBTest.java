@@ -5,24 +5,20 @@ import Domain.Validation.UserValidator;
 import Domain.Validation.ValidationException;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
-import Repository.ConcreteRepositories.UserDBRepository;
-import Repository.ConcreteRepositories.UserFileRepository;
+import Repository.ConcreteRepositories.DB.UserDBRepository;
 import Repository.Exceptions.RepositoryException;
-import Repository.Factory.PropertyFactory;
+import util.factory.PropertyFactory;
 import Repository.Factory.RepositoryFactory;
 import Repository.Helpers.DefaultFilters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import util.paging.Page;
+import util.paging.Pageable;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.sql.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,7 +64,7 @@ public class UserDBTest {
     }
     @Test
     void testLoad() {
-        PropertyFactory propertyFactory = new PropertyFactory();
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
         RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile("test_data/Resources/db_test.properties"));
         Validator<User> validator = new UserValidator();
         Repository<Long, User> new_repo = factory.createUserRepository(validator);
@@ -86,7 +82,7 @@ public class UserDBTest {
 
     @Test
     void testStore() {
-        PropertyFactory propertyFactory = new PropertyFactory();
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
         RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile("test_data/Resources/db_test.properties"));
         Validator<User> validator = new UserValidator();
         Repository<Long, User> new_repo = factory.createUserRepository(validator);
@@ -101,7 +97,7 @@ public class UserDBTest {
     }
     @Test
     void testFindAll(){
-        PropertyFactory propertyFactory = new PropertyFactory();
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
         RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile("test_data/Resources/db_test.properties"));
         Validator<User> validator = new UserValidator();
         Repository<Long, User> new_repo = factory.createUserRepository(validator);
@@ -123,7 +119,7 @@ public class UserDBTest {
 
     @Test
     void testAdd(){
-        PropertyFactory propertyFactory = new PropertyFactory();
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
         RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile("test_data/Resources/db_test.properties"));
         Validator<User> validator = new UserValidator();
         Repository<Long, User> new_repo = factory.createUserRepository(validator);
@@ -149,7 +145,7 @@ public class UserDBTest {
 
     @Test
     void testDelete(){
-        PropertyFactory propertyFactory = new PropertyFactory();
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
         RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile("test_data/Resources/db_test.properties"));
         Validator<User> validator = new UserValidator();
         Repository<Long, User> new_repo = factory.createUserRepository(validator);
@@ -166,7 +162,7 @@ public class UserDBTest {
 
     @Test
     void testModify(){
-        PropertyFactory propertyFactory = new PropertyFactory();
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
         RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile("test_data/Resources/db_test.properties"));
         Validator<User> validator = new UserValidator();
         Repository<Long, User> new_repo = factory.createUserRepository(validator);
@@ -186,5 +182,47 @@ public class UserDBTest {
         else{
             fail();
         }
+    }
+    @Test
+    void testFindAllOnPage(){
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
+        RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile("test_data/Resources/db_test.properties"));
+        Validator<User> validator = new UserValidator();
+        Repository<Long, User> new_repo = factory.createUserRepository(validator);
+
+        assertInstanceOf(UserDBRepository.class, new_repo);
+
+        UserDBRepository userRepo = (UserDBRepository) new_repo;
+
+        assertThrows(RepositoryException.class, () -> userRepo.findAllOnPage(null));
+        assertThrows(IllegalArgumentException.class, () -> userRepo.findAllOnPage(new Pageable(-1,-2)));
+
+        Page<User> firstPage = userRepo.findAllOnPage(new Pageable(0,2));
+        assertEquals(3, firstPage.getTotalNumberOfElements());
+
+        List<User> users = (List<User>) firstPage.getElementsOnPage();
+        assertEquals(2, users.size());
+
+        assertEquals("John Doe",users.getFirst().getName());
+        assertEquals("Phil Smith",users.getLast().getName());
+
+        Page<User> secondPage = userRepo.findAllOnPage(new Pageable(1,2));
+
+        List<User> users2 = (List<User>) secondPage.getElementsOnPage();
+        assertEquals(1, users2.size());
+
+        assertEquals("Luke Scott",users2.getFirst().getName());
+
+        Page<User> thirdPage = userRepo.findAllOnPage(new Pageable(3,1));
+
+        List<User> users3 = (List<User>) thirdPage.getElementsOnPage();
+        assertEquals(0,users3.size());
+
+        Page<User> testPage = userRepo.findAllOnPage(new Pageable(1,1));
+
+        List<User> users4 = (List<User>) testPage.getElementsOnPage();
+
+        assertEquals(1,users4.size());
+        assertEquals("Phil Smith",users4.getFirst().getName());
     }
 }

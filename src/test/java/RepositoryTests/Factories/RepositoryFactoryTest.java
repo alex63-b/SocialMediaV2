@@ -1,14 +1,14 @@
 package RepositoryTests.Factories;
 
 import Domain.Objects.Friendship;
-import Domain.Objects.Pair;
+import util.datatypes.OrderedPair;
 import Domain.Objects.User;
 import Domain.Validation.FriendshipValidator;
 import Domain.Validation.UserValidator;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
 import Repository.Exceptions.ConfigException;
-import Repository.Factory.PropertyFactory;
+import util.factory.PropertyFactory;
 import Repository.Factory.RepositoryFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +54,7 @@ class RepositoryFactoryTest {
     }
     @Test
     void testCreateUserRepository() {
-        PropertyFactory propertyFactory = new PropertyFactory();
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
         RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile(config_path));
 
         Validator<User> userValidator = new UserValidator();
@@ -73,7 +73,7 @@ class RepositoryFactoryTest {
 
     @Test
     void testCreateFriendshipRepository() {
-        PropertyFactory propertyFactory = new PropertyFactory();
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
         RepositoryFactory factory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile(config_path));
 
         Validator<User> userValidator = new UserValidator();
@@ -82,13 +82,13 @@ class RepositoryFactoryTest {
         assertThrows(ConfigException.class,() -> factory.createFriendshipRepository(friendshipValidator));
 
         Repository<Long,User> userRepository = factory.createUserRepository(userValidator);
-        Repository<Pair<Long>,Friendship> friendshipFileRepo = factory.createFriendshipRepository(friendshipValidator);
+        Repository<OrderedPair<Long>,Friendship> friendshipFileRepo = factory.createFriendshipRepository(friendshipValidator);
 
         assertEquals(2,friendshipFileRepo.size());
 
-        if(friendshipFileRepo.findElement(new Pair<>(1L,3L)).isPresent() && friendshipFileRepo.findElement(new Pair<>(3L,2L)).isPresent()) {
-            assertEquals("John Doe", friendshipFileRepo.findElement(new Pair<>(1L, 3L)).get().getFriend1().getName());
-            assertEquals("Luke Scott", friendshipFileRepo.findElement(new Pair<>(3L, 2L)).get().getFriend2().getName());
+        if(friendshipFileRepo.findElement(new OrderedPair<>(1L,3L)).isPresent() && friendshipFileRepo.findElement(new OrderedPair<>(3L,2L)).isPresent()) {
+            assertEquals("John Doe", friendshipFileRepo.findElement(new OrderedPair<>(1L, 3L)).get().getFriend1().getName());
+            assertEquals("Luke Scott", friendshipFileRepo.findElement(new OrderedPair<>(3L, 2L)).get().getFriend2().getName());
         }
         else{
             fail();
