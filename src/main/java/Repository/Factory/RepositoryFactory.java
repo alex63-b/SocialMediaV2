@@ -1,11 +1,16 @@
 package Repository.Factory;
 
 import Domain.Objects.Friendship;
-import Domain.Objects.Pair;
+import util.datatypes.OrderedPair;
 import Domain.Objects.User;
 import Domain.Validation.Validator;
-import Repository.ConcreteRepositories.*;
 import Repository.AbstractRepositories.Repository;
+import Repository.ConcreteRepositories.DB.FriendshipDBRepository;
+import Repository.ConcreteRepositories.DB.UserDBRepository;
+import Repository.ConcreteRepositories.File.FriendshipFileRepository;
+import Repository.ConcreteRepositories.File.UserFileRepository;
+import Repository.ConcreteRepositories.Memory.MemoryFriendshipRepository;
+import Repository.ConcreteRepositories.Memory.MemoryUserRepository;
 import Repository.Exceptions.ConfigException;
 
 import java.util.Map;
@@ -19,7 +24,7 @@ public class RepositoryFactory {
     private Repository<Long,User> userRepository = null;
     private final Properties properties;
     private final Map<RepositoryType, Function<Validator<User>,Repository<Long,User>>> userFactory;
-    private final Map<RepositoryType, Function<Validator<Friendship>,Repository<Pair<Long>,Friendship>>> friendshipFactory;
+    private final Map<RepositoryType, Function<Validator<Friendship>,Repository<OrderedPair<Long>,Friendship>>> friendshipFactory;
     /**
      * This function creates a repository factory using the specified properties, and initializes the functional maps that
      * convert the repository types into factories.
@@ -90,6 +95,20 @@ public class RepositoryFactory {
         if(properties.getProperty("db.password") == null){
             throw new ConfigException("The configuration file doesn't have the database password!");
         }
+        if(properties.getProperty("db.pageSize") == null){
+            throw new ConfigException("The configuration file doesn't have the page size!");
+        }
+        else{
+            try{
+                int pageSize = Integer.parseInt(properties.getProperty("db.pageSize"));
+                if(pageSize <= 0){
+                    throw new IllegalArgumentException("The configuration file has a negative or 0 page size!");
+                }
+            }
+            catch (NumberFormatException e){
+                throw new ConfigException("The configuration file has a page size that isn't a number!");
+            }
+        }
     }
     /**
      * This function creates a user repository for the configured storage type.
@@ -97,7 +116,7 @@ public class RepositoryFactory {
      * @return the configured user repository;
      * @throws ConfigException if required configuration is missing or the repository type is unsupported;
      */
-    public Repository<Long,User> createUserRepository(Validator<User> validator){
+    public Repository<Long, User> createUserRepository(Validator<User> validator){
         RepositoryType repositoryType = getRepositoryType();
         if(userFactory.containsKey(repositoryType)) {
             userRepository = userFactory.get(repositoryType).apply(validator);
@@ -115,7 +134,7 @@ public class RepositoryFactory {
      * @throws ConfigException if required configuration is missing, repository types do not match, the user repository hasn't been
      * initialized yet, or the configured type is unsupported;
      */
-    public Repository<Pair<Long>,Friendship> createFriendshipRepository(Validator<Friendship> friendshipValidator){
+    public Repository<OrderedPair<Long>,Friendship> createFriendshipRepository(Validator<Friendship> friendshipValidator){
         RepositoryType repositoryType = getRepositoryType();
         if(userRepository == null){
             throw new ConfigException("You can't create a friendship repository without an user repository!");

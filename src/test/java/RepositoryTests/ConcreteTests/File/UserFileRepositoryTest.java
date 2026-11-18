@@ -4,7 +4,7 @@ import Domain.Objects.User;
 import Domain.Validation.UserValidator;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
-import Repository.ConcreteRepositories.UserFileRepository;
+import Repository.ConcreteRepositories.File.UserFileRepository;
 import Repository.Helpers.DefaultFilters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

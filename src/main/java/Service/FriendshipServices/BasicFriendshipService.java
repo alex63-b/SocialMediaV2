@@ -1,7 +1,7 @@
 package Service.FriendshipServices;
 
 import Domain.Objects.Friendship;
-import Domain.Objects.Pair;
+import util.datatypes.OrderedPair;
 import Domain.Objects.User;
 import Domain.Validation.ValidationException;
 import Repository.AbstractRepositories.Repository;
@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
  * This class provides operations for managing friendships and analyzing user communities.
  */
 public class BasicFriendshipService {
-    protected final Repository<Pair<Long>, Friendship> friendshipRepo;
+    protected final Repository<OrderedPair<Long>, Friendship> friendshipRepo;
     private final Repository<Long, User> userRepo;
 
     /**
@@ -26,7 +26,7 @@ public class BasicFriendshipService {
      * @param repo the repository used to store and retrieve friendships;
      * @param userRepo the repository used to store and retrieve users;
      */
-    public BasicFriendshipService(Repository<Pair<Long>, Friendship> repo, Repository<Long, User> userRepo) {
+    public BasicFriendshipService(Repository<OrderedPair<Long>, Friendship> repo, Repository<Long, User> userRepo) {
         this.friendshipRepo = repo;
         this.userRepo = userRepo;
     }
@@ -58,7 +58,7 @@ public class BasicFriendshipService {
      * @throws ValidationException if the friendship does not exist;
      */
     public void deleteFriendship(Long friendId1, Long friendId2){
-        if(friendshipRepo.deleteElement(new Pair<>(friendId1,friendId2)).isEmpty()){
+        if(friendshipRepo.deleteElement(new OrderedPair<>(friendId1,friendId2)).isEmpty()){
             throw new ValidationException("The ID's of the friends don't exist!");
         }
     }
@@ -170,5 +170,27 @@ public class BasicFriendshipService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList());
+    }
+
+    /**
+     * Returns all users that are friends with the specified user.
+     *
+     * @param userId the identifier of the user
+     * @return the user's friends
+     */
+    public List<User> getUserFriendships(Long userId){
+        return friendshipRepo.findAll((friendship) ->
+                friendship.getFriend1().getId().equals(userId) || friendship.getFriend2().getId().equals(userId))
+                .stream()
+                .map((f) -> {
+                    if(f.getFriend1().getId().equals(userId)){
+                        return f.getFriend2();
+                    }
+                    else{
+                        return f.getFriend1();
+                    }
+                })
+                .sorted(Comparator.comparingLong(User::getId))
+                .toList();
     }
 }
