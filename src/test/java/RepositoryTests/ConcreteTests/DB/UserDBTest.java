@@ -1,7 +1,7 @@
 package RepositoryTests.ConcreteTests.DB;
 
 import Domain.Objects.User;
-import Domain.Validation.UserValidator;
+import Domain.Validation.IntegrityValidation.UserValidator;
 import Domain.Validation.ValidationException;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;

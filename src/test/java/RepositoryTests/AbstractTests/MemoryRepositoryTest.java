@@ -1,7 +1,7 @@
 package RepositoryTests.AbstractTests;
 
 import Domain.Objects.User;
-import Domain.Validation.UserValidator;
+import Domain.Validation.IntegrityValidation.UserValidator;
 import Domain.Validation.ValidationException;
 import Repository.AbstractRepositories.MemoryRepository;
 import Repository.AbstractRepositories.Repository;

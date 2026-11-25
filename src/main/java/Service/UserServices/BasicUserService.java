@@ -2,7 +2,7 @@ package Service.UserServices;
 
 import Domain.Objects.User;
 import Domain.Validation.ValidationException;
-import Domain.Validation.UserValidator;
+import Domain.Validation.IntegrityValidation.UserValidator;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
 import Repository.Exceptions.RepositoryException;
@@ -37,14 +37,14 @@ public class BasicUserService {
      */
     public BasicUserService(Repository<Long, User> repository){
         this.repository = repository;
-        this.validator = new UserValidator();/*.andThen((user) -> {
+        this.validator = new UserValidator().andThen((user) -> {
             if(!user.getName().matches("[a-zA-Z -]+")){
                 throw new ValidationException("The name must contain only letters!");
             }
             if(!user.getFirstName().matches("[a-zA-Z -]+")){
                 throw new ValidationException("The first name must contain only letters!");
             }
-        });*/
+        });
         nextID = 0L;
         setNextID();
     }
@@ -70,6 +70,8 @@ public class BasicUserService {
      * @param firstName the new first name of the modified user;
      */
     public void updateUser(Long id, String name, String firstName){
+        User newUser = new User(id,name,firstName);
+        validator.validate(newUser);
         if(repository.modifyElement(new User(id,name,firstName)).isPresent()){
             throw new ValidationException("The user with this ID doesn't exist!");
         }

@@ -1,7 +1,7 @@
 package ServiceTests.UserServices;
 
 import Domain.Objects.User;
-import Domain.Validation.UserValidator;
+import Domain.Validation.IntegrityValidation.UserValidator;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
 import Repository.ConcreteRepositories.File.UserFileRepository;

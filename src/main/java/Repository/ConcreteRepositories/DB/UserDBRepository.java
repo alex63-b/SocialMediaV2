@@ -1,7 +1,7 @@
 package Repository.ConcreteRepositories.DB;
 
 import Domain.Objects.User;
-import Domain.Validation.PageableValidator;
+import Domain.Validation.IntegrityValidation.PageableValidator;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.PagingRepository;
 import Repository.AbstractRepositories.Repository;

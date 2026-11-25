@@ -1,7 +1,7 @@
 package Repository.ConcreteRepositories.DB;
 
 import Domain.Objects.Friendship;
-import Domain.Validation.PageableValidator;
+import Domain.Validation.IntegrityValidation.PageableValidator;
 import util.datatypes.OrderedPair;
 import Domain.Objects.User;
 import Domain.Validation.Validator;
@@ -14,7 +14,6 @@ import util.paging.Pageable;
 import java.security.InvalidParameterException;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

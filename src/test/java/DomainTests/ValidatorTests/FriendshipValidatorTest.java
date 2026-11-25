@@ -2,7 +2,7 @@ package DomainTests.ValidatorTests;
 
 import Domain.Objects.Friendship;
 import Domain.Objects.User;
-import Domain.Validation.FriendshipValidator;
+import Domain.Validation.IntegrityValidation.FriendshipValidator;
 import Domain.Validation.ValidationException;
 import Domain.Validation.Validator;
 import org.junit.jupiter.api.Test;

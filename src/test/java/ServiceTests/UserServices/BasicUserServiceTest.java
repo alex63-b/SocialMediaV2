@@ -1,27 +1,32 @@
 package ServiceTests.UserServices;
 
 import Domain.Objects.User;
-import Domain.Validation.UserValidator;
+import Domain.Validation.IntegrityValidation.UserValidator;
 import Domain.Validation.ValidationException;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
 import Repository.ConcreteRepositories.File.UserFileRepository;
+import Repository.Factory.RepositoryFactory;
+import Service.Factories.ServiceFactory;
 import Service.UserServices.BasicUserService;
 import Service.UserServices.ConsoleUserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import util.factory.PropertyFactory;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BasicUserServiceTest {
-    String test_path = "test_data/Users/user_data.csv";
+    private static final String test_path = "test_data/Users/user_data.csv";
+    private static final String config_path = "test_data/Resources/test_config.properties";
     @BeforeEach
     public void setUp(){
         reloadFile();
@@ -59,7 +64,28 @@ public class BasicUserServiceTest {
             fail();
         }
     }
+    @Test
+    void testUpdateUser(){
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
+        Properties configProperties = propertyFactory.propertiesFromConfigFile(config_path);
 
+        Validator<User> validator = new UserValidator();
+
+        RepositoryFactory repositoryFactory = new RepositoryFactory(configProperties);
+        Repository<Long, User> userRepository = repositoryFactory.createUserRepository(validator);
+
+        ServiceFactory serviceFactory = new ServiceFactory(configProperties);
+        BasicUserService userService = serviceFactory.createUserService(userRepository);
+
+        assertThrows(ValidationException.class, () -> userService.updateUser(-1L,"ala","bala"));
+        assertThrows(ValidationException.class, () -> userService.updateUser(1L,"53131553131544151","bala"));
+
+        userService.updateUser(1L,"user","nou");
+        if(userRepository.findElement(1L).isPresent()) {
+            assertEquals("user", userRepository.findElement(1L).get().getName());
+            assertEquals("nou", userRepository.findElement(1L).get().getFirstName());
+        }
+    }
     @Test
     void testDeleteUser() {
         Validator<User> validator = new UserValidator();

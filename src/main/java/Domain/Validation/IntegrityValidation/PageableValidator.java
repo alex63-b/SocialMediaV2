@@ -1,5 +1,6 @@
-package Domain.Validation;
+package Domain.Validation.IntegrityValidation;
 
+import Domain.Validation.Validator;
 import util.paging.Pageable;
 
 /**

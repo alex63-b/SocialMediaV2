@@ -1,13 +1,15 @@
-package Domain.Validation;
+package Domain.Validation.IntegrityValidation;
 
 import Domain.Objects.Friendship;
+import Domain.Validation.ValidationException;
+import Domain.Validation.Validator;
 
 import java.time.LocalDateTime;
 
 /**
  * This class validates friendships by checking their users and start dates.
  */
-public class FriendshipValidator implements Validator<Friendship>{
+public class FriendshipValidator implements Validator<Friendship> {
     /**
      * This function checks that both users are valid and are not the same user.
      * @param friendship the friendship whose users to validate;

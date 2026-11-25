@@ -1,6 +1,6 @@
 package DomainTests.ValidatorTests;
 
-import Domain.Validation.PageableValidator;
+import Domain.Validation.IntegrityValidation.PageableValidator;
 import Domain.Validation.Validator;
 import org.junit.jupiter.api.Test;
 import util.paging.Pageable;

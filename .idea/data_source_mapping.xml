@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/DBScripts/SMCreation.sql" value="95a350e0-de57-43aa-a636-81a7b506c90c" />
+    <file url="file://$PROJECT_DIR$/DBScripts/SMCreation.sql" value="00ffb7be-3656-4ee6-b691-714c7ef18afb" />
     <file url="file://$PROJECT_DIR$/src/main/java/Repository/ConcreteRepositories/DB/FriendshipDBRepository.java" value="00ffb7be-3656-4ee6-b691-714c7ef18afb" />
+    <file url="file://$PROJECT_DIR$/src/test/java/RepositoryTests/ConcreteTests/DB/FriendRequestDBRepositoryTest.java" value="95a350e0-de57-43aa-a636-81a7b506c90c" />
+    <file url="file://$PROJECT_DIR$/src/test/java/RepositoryTests/Factories/RepositoryFactoryTest.java" value="95a350e0-de57-43aa-a636-81a7b506c90c" />
   </component>
 </project>

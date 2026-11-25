@@ -1,6 +1,8 @@
 package Repository.Factory;
 
+import Domain.Objects.FriendRequest;
 import Domain.Objects.Friendship;
+import Repository.ConcreteRepositories.DB.FriendRequestDBRepository;
 import util.datatypes.OrderedPair;
 import Domain.Objects.User;
 import Domain.Validation.Validator;
@@ -25,6 +27,7 @@ public class RepositoryFactory {
     private final Properties properties;
     private final Map<RepositoryType, Function<Validator<User>,Repository<Long,User>>> userFactory;
     private final Map<RepositoryType, Function<Validator<Friendship>,Repository<OrderedPair<Long>,Friendship>>> friendshipFactory;
+    private final Map<RepositoryType, Function<Validator<FriendRequest>,Repository<Long,FriendRequest>>> friendRequestFactory;
     /**
      * This function creates a repository factory using the specified properties, and initializes the functional maps that
      * convert the repository types into factories.
@@ -68,6 +71,13 @@ public class RepositoryFactory {
                 RepositoryType.DATABASE,(validator) -> {
                     validateDBParameters();
                     return new FriendshipDBRepository(userRepository,validator,properties.getProperty("db.url"),
+                            properties.getProperty("db.user"),properties.getProperty("db.password"));
+                }
+        );
+        this.friendRequestFactory = Map.of(
+                RepositoryType.DATABASE, (validator) -> {
+                    validateDBParameters();
+                    return new FriendRequestDBRepository(userRepository,validator,properties.getProperty("db.url"),
                             properties.getProperty("db.user"),properties.getProperty("db.password"));
                 }
         );
@@ -141,6 +151,18 @@ public class RepositoryFactory {
         }
         if(friendshipFactory.containsKey(repositoryType)){
             return friendshipFactory.get(repositoryType).apply(friendshipValidator);
+        }
+        else{
+            throw new ConfigException("Repository type not found!");
+        }
+    }
+    public Repository<Long, FriendRequest> createFriendRequestRepository(Validator<FriendRequest> friendRequestValidator){
+        RepositoryType repositoryType = getRepositoryType();
+        if(userRepository == null){
+            throw new ConfigException("You can't create a friendship repository without an user repository!");
+        }
+        if(friendRequestFactory.containsKey(repositoryType)){
+            return friendRequestFactory.get(repositoryType).apply(friendRequestValidator);
         }
         else{
             throw new ConfigException("Repository type not found!");

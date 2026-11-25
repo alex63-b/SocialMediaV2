@@ -13,5 +13,12 @@ CREATE TABLE IF NOT EXISTS friendships (
     CHECK (id1 < id2)
     );
 
+CREATE TABLE IF NOT EXISTS friend_requests (
+                                               id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                                               from_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
+    to_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
+    status VARCHAR(100),
+    date TIMESTAMP
+    );
 DROP TABLE testFriendships;
 DROP TABLE testUsers;

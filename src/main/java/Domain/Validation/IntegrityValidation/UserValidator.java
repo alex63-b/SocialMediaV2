@@ -1,11 +1,13 @@
-package Domain.Validation;
+package Domain.Validation.IntegrityValidation;
 
 import Domain.Objects.User;
+import Domain.Validation.ValidationException;
+import Domain.Validation.Validator;
 
 /**
  * This class validates users by checking their IDs, names, and first names.
  */
-public class UserValidator implements Validator<User>{
+public class UserValidator implements Validator<User> {
     /**
      * This function checks that a user's ID is greater than zero.
      * @param id the ID to validate;

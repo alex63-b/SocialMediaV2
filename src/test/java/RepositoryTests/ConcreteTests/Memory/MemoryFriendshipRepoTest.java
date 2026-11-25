@@ -2,8 +2,8 @@ package RepositoryTests.ConcreteTests.Memory;
 
 import Domain.Objects.Friendship;
 import Domain.Objects.User;
-import Domain.Validation.FriendshipValidator;
-import Domain.Validation.UserValidator;
+import Domain.Validation.IntegrityValidation.FriendshipValidator;
+import Domain.Validation.IntegrityValidation.UserValidator;
 import Domain.Validation.Validator;
 import Repository.ConcreteRepositories.Memory.MemoryFriendshipRepository;
 import Repository.ConcreteRepositories.Memory.MemoryUserRepository;

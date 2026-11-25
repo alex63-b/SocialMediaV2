@@ -1,8 +1,8 @@
 import Domain.Objects.Friendship;
 import util.datatypes.OrderedPair;
 import Domain.Objects.User;
-import Domain.Validation.FriendshipValidator;
-import Domain.Validation.UserValidator;
+import Domain.Validation.IntegrityValidation.FriendshipValidator;
+import Domain.Validation.IntegrityValidation.UserValidator;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
 import Repository.Exceptions.ConfigException;

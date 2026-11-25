@@ -1,10 +1,12 @@
 package ServiceTests.FriendshipServices;
 
 import Domain.Objects.Friendship;
+import Repository.Factory.RepositoryFactory;
+import Service.Factories.ServiceFactory;
 import util.datatypes.OrderedPair;
 import Domain.Objects.User;
-import Domain.Validation.FriendshipValidator;
-import Domain.Validation.UserValidator;
+import Domain.Validation.IntegrityValidation.FriendshipValidator;
+import Domain.Validation.IntegrityValidation.UserValidator;
 import Domain.Validation.ValidationException;
 import Domain.Validation.Validator;
 import Repository.AbstractRepositories.Repository;
@@ -14,6 +16,7 @@ import Service.FriendshipServices.BasicFriendshipService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import util.factory.PropertyFactory;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -30,6 +33,8 @@ public class BasicFriendshipServiceTest {
     private static final String friendship_path = "test_data/Friendships/friendship_data.csv";
     private static final String user_big_path = "test_data/Users/big_user_data.csv";
     private static final String friendship_big_path = "test_data/Friendships/big_friendship_data.csv";
+
+    private static final String file_config_path = "test_data/Resources/test_config.properties";
     @BeforeEach
     void setUp() {
         reloadFile();
@@ -75,6 +80,32 @@ public class BasicFriendshipServiceTest {
             LocalDateTime date = LocalDateTime.now().minusMinutes(1);
             assertTrue(date.isBefore(friendship_repo.findElement(new OrderedPair<>(1L, 2L)).get().getDate()));
             assertTrue(LocalDateTime.now().isAfter(friendship_repo.findElement(new OrderedPair<>(1L, 2L)).get().getDate()));
+        }
+        else{
+            fail();
+        }
+    }
+    @Test
+    void testUpdateFriendship(){
+        PropertyFactory propertyFactory = PropertyFactory.getPropertyFactory();
+        RepositoryFactory repositoryFactory = new RepositoryFactory(propertyFactory.propertiesFromConfigFile(file_config_path));
+
+        Validator<User> userValidator = new UserValidator();
+        Validator<Friendship> friendshipValidator = new FriendshipValidator();
+
+        Repository<Long,User> user_repo = repositoryFactory.createUserRepository(userValidator);
+        Repository<OrderedPair<Long>,Friendship> friendship_repo = repositoryFactory.createFriendshipRepository(friendshipValidator);
+
+        ServiceFactory serviceFactory = new ServiceFactory(propertyFactory.propertiesFromConfigFile(file_config_path));
+        BasicFriendshipService service = serviceFactory.createFriendshipService(friendship_repo,user_repo);
+
+        assertThrows(ValidationException.class,() -> service.updateFriendship(1L,2L,"2026-07-13T21:03:24"));
+        assertThrows(ValidationException.class,() -> service.updateFriendship(1L,2L,"22313"));
+
+        service.updateFriendship(1L,3L,"2026-07-13T21:03:24");
+
+        if(friendship_repo.findElement(new OrderedPair<>(1L,3L)).isPresent()){
+            assertEquals("2026-07-13T21:03:24",friendship_repo.findElement(new OrderedPair<>(1L,3L)).get().getDate().toString());
         }
         else{
             fail();
